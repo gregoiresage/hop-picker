@@ -1,4 +1,6 @@
-hop-picker
+HopPicker's watchface
 ==========
 
-HopPicker's watchface for Pebble
+This watchfaceis based on the HopPicker's concept below :
+
+![Hop picker's concept](http://i.imgur.com/Bf4C7nZ.gif)
