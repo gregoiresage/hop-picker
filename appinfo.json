@@ -1,0 +1,51 @@
+{
+    "versionLabel": "1.0.6",
+    "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
+    "appKeys": {
+        "color": 0,
+        "inverted": 1
+    },
+    "longName": "concept",
+    "versionCode": 7,
+    "capabilities": [
+        "configurable"
+    ],
+    "shortName": "concept1",
+    "companyName": "Gregoire Sage",
+    "watchapp": {
+        "watchface": true
+    },
+    "resources": {
+        "media": [
+            {
+                "characterRegex": "[0-9]",
+                "type": "font",
+                "name": "COMFORTAA_40",
+                "file": "fonts/Comfortaa-Bold.ttf"
+            }
+        ]
+    },
+    "preferences": {
+    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker2.html",
+    "items": [{
+        "name":     "color",
+        "title":    "Black & White",
+        "subtitle": "",
+        "type":   "switch",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": false
+    }
+    ,
+    {
+        "name":     "inverted",
+        "title":    "Inverted",
+        "subtitle": "",
+        "type":   "switch",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": false
+    }
+  ]
+  }
+}

@@ -1,0 +1,1 @@
+pebble-autoconfig/wscript-submodule

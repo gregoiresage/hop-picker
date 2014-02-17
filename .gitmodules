@@ -1,0 +1,3 @@
+[submodule "pebble-autoconfig"]
+	path = pebble-autoconfig
+	url = http://code.google.com/p/pebble-autoconfig
