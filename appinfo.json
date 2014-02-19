@@ -31,7 +31,7 @@
         "name":     "color",
         "title":    "Black & White",
         "subtitle": "",
-        "type":   "switch",
+        "type":   "boolean",
         "off-text": "OFF",
         "on-text": "ON",
         "default": false
@@ -41,7 +41,7 @@
         "name":     "inverted",
         "title":    "Inverted",
         "subtitle": "",
-        "type":   "switch",
+        "type":   "boolean",
         "off-text": "OFF",
         "on-text": "ON",
         "default": false
