@@ -1,16 +1,16 @@
 {
-    "versionLabel": "1.0.6",
+    "versionLabel": "1.0.7",
     "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
     "appKeys": {
         "color": 0,
         "inverted": 1
     },
-    "longName": "concept",
+    "longName": "HopPicker",
     "versionCode": 7,
     "capabilities": [
         "configurable"
     ],
-    "shortName": "concept1",
+    "shortName": "HopPicker",
     "companyName": "Gregoire Sage",
     "watchapp": {
         "watchface": true
