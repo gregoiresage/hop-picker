@@ -54,6 +54,10 @@ static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13
 
 static char date_text[3] = "31";
 
+static bool containsCircle(GPoint center, int radius){
+	return center.x - radius > 0 && center.x + radius < 144 && center.y - radius > 0 && center.y + radius < 168;
+}
+
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 	layer_mark_dirty(window_get_root_layer(window));
 }
@@ -116,19 +120,14 @@ static void drawClock(GPoint center, int hour, GContext *ctx){
 
 static void drawDate(GPoint center, int angle, int date, GContext *ctx){
 	GPoint segA;
-	// const int16_t datePosFromCenter = 92;
-	const int16_t datePosFromCenter = 80;
 
-	int16_t posFromCenter = 0;
-	if(angle <= TRIG_MAX_ANGLE/4 || (angle >= TRIG_MAX_ANGLE/2 && angle <= 3*TRIG_MAX_ANGLE/4)){
-		posFromCenter = 80 + 12.0 * (angle % (TRIG_MAX_ANGLE/2)) / (TRIG_MAX_ANGLE / 4);
+	int16_t posFromCenter = 100;
+	do{
+		segA.y = (int16_t)(-cos_lookup(angle) * (int32_t)posFromCenter / TRIG_MAX_RATIO) + center.y;
+		segA.x = (int16_t)(sin_lookup(angle) * (int32_t)posFromCenter / TRIG_MAX_RATIO) + center.x;
+		posFromCenter--;
 	}
-	else {
-		posFromCenter = 92 - 12.0 * (angle % (TRIG_MAX_ANGLE/4)) / (TRIG_MAX_ANGLE / 4);
-	}
-
-	segA.y = (int16_t)(-cos_lookup(angle) * (int32_t)posFromCenter / TRIG_MAX_RATIO) + center.y;
-	segA.x = (int16_t)(sin_lookup(angle) * (int32_t)posFromCenter / TRIG_MAX_RATIO) + center.x;
+	while(containsCircle(segA, 14 + 1));
 
 	snprintf(date_text, sizeof(date_text), "%d", date); 
 
