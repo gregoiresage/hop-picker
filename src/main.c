@@ -260,17 +260,6 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(layer);
 }
 
-static void handle_accel_tap(AccelAxisType axis, int32_t direction)
-{
- 
-   // App Messages can be sent while using Pebble Autoconfig
-	DictionaryIterator *iter;
-	app_message_outbox_begin(&iter);
-	dict_write_cstring(iter, CALENDAR_PKEY, "Knock, knock!");
-	dict_write_end(iter);
-  	app_message_outbox_send();
-}  // handle_accel_tap()
-
 static void init(void) {
 	autoconfig_init();
 	window = window_create();
@@ -298,8 +287,6 @@ static void init(void) {
 	app_message_register_inbox_received(in_received_handler);
 
 	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
-
-	accel_tap_service_subscribe(&handle_accel_tap);
 
 	window_stack_push(window, true);
 }
