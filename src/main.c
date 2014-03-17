@@ -228,9 +228,7 @@ static void window_appear(Window *window){
 
 	}
 
-
-
-	timer = app_timer_register(100 /* milliseconds */, animation_timer_callback, NULL);
+	timer = app_timer_register(500 /* milliseconds */, animation_timer_callback, NULL);
 }
 
 static void window_unload(Window *window) {
