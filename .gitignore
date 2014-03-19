@@ -2,4 +2,3 @@
 .lock-*
 build
 deploy
-gae/secret.py
