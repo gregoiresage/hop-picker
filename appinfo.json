@@ -1,5 +1,5 @@
 {
-    "versionLabel": "1.0.11",
+    "versionLabel": "1.0.12",
     "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
     "appKeys": {
         "color": 0,
@@ -10,7 +10,7 @@
         "display_bt_icon" : 5
     },
     "longName": "HopPicker",
-    "versionCode": 11,
+    "versionCode": 12,
     "capabilities": [
         "configurable"
     ],
