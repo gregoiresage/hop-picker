@@ -5,7 +5,9 @@
         "color": 0,
         "inverted": 1,
         "date": 2,
-        "hand" : 3
+        "hand" : 3,
+        "vibrate_on_bt_lost" : 4,
+        "display_bt_icon" : 5
     },
     "longName": "HopPicker",
     "versionCode": 11,
@@ -30,11 +32,16 @@
                 "type": "font",
                 "name": "COMFORTAA_18",
                 "file": "fonts/Comfortaa-Bold.ttf"
+            },
+            {
+              "type":"png",
+              "name":"IMAGE_BT_DISCONNECTED",
+              "file":"images/bluetooth_not_connected.png"
             }
         ]
     },
     "preferences": {
-    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker2.html",
+    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker3.html",
     "items": [{
         "name":     "color",
         "title":    "Black & White",
@@ -72,6 +79,26 @@
         "type":   "enum",
         "choices":  {"LINE":"Line", "ARROW":"Arrow"},
         "default":  0
+    }
+    ,
+    {
+        "name":     "vibrate_on_bt_lost",
+        "title":    "Vibrate on Bluetooth disconnection",
+        "subtitle": "",
+        "type":   "boolean",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": false
+    }
+    ,
+    {
+        "name":     "display_bt_icon",
+        "title":    "Display icon on Bluetooth disconnection",
+        "subtitle": "",
+        "type":   "boolean",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": false
     }
   ]
   }

@@ -5,6 +5,8 @@ static Window *window;
 static Layer  *layer;
 static InverterLayer* inverter_layer;
 
+static GBitmap *bt_disconnected = NULL;
+
 GFont custom_font;
 GFont small_font;
 
@@ -27,6 +29,8 @@ static AppTimer *timer;
 static int anim_minutes = 0;
 static bool isAnimating = false;
 static int increaseAnimation = 20;
+
+static bool btConnected = false;
 
 
 
@@ -174,6 +178,17 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	secondHand.x = (int16_t)(-sin_lookup(second_angle) * (int32_t)secondHandLength / TRIG_MAX_RATIO) + center.x;
 
 	drawClock(secondHand, hours, ctx);
+
+	if(getDisplay_bt_icon() && !btConnected){
+		if(hours % 12 < 3)
+  			graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,0,32,32));
+  		else if(hours % 12 < 6)
+  			graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,160-32,32,32));
+  		else if(hours % 12 < 9)
+  			graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
+  		else 
+  			graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
+	}
 	
 	drawHand(secondHand, second_angle, ctx);
 
@@ -258,6 +273,20 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(layer);
 }
 
+static void bluetooth_connection_handler(bool connected){
+	btConnected = connected;
+	if(getVibrate_on_bt_lost()){
+		vibes_cancel();
+		if(connected){
+			vibes_long_pulse();
+		}
+		else {
+			vibes_double_pulse();
+		}
+	}
+	layer_mark_dirty(layer);
+}
+
 static void init(void) {
 	autoconfig_init();
 	window = window_create();
@@ -270,6 +299,8 @@ static void init(void) {
 
 	custom_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_40));
 	small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_18));
+
+	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
 
 	if(getHand() == HAND_LINE){
 		for(int i=0; i<2; i++){
@@ -286,6 +317,9 @@ static void init(void) {
 
 	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
 
+	btConnected = bluetooth_connection_service_peek();
+	bluetooth_connection_service_subscribe(bluetooth_connection_handler);
+
 	window_stack_push(window, true);
 }
 
@@ -293,10 +327,12 @@ static void deinit(void) {
 	autoconfig_deinit();
 	fonts_unload_custom_font(custom_font);
 	fonts_unload_custom_font(small_font);
+	gbitmap_destroy(bt_disconnected);
 	for(int i=0; i<2; i++){
 		gpath_destroy(hour_arrow[i]);
 	}
 	window_destroy(window);
+	bluetooth_connection_service_unsubscribe();
 }
 
 int main(void) {
