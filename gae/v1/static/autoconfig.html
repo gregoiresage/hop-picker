@@ -4,634 +4,216 @@
 	<title>HopPicker</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="http://yui.yahooapis.com/combo?pure/0.4.2/base-min.css&pure/0.4.2/buttons-min.css&pure/0.4.2/forms-min.css&pure/0.4.2/grids-min.css">
-
-	<style type="text/css" media="screen">
-* {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-}
-
-html, button, input, select, textarea,
-.pure-g [class *= "pure-u"] {
-	font-family: "proxima-nova", sans-serif;
-}
-
-body {
-	min-width: 320px;
-	color: #777;
-	line-height: 1.6;
-}
-
-
-/* --------------------------
- * Element Styles
- * --------------------------
-*/
-
-h1, h2, h3, h4, h5, h6 {
-	font-weight: bold;
-	color: rgb(75, 75, 75);
-}
-h3 {
-	font-size: 1.25em;
-}
-h4 {
-	font-size: 1.125em;
-	margin: 0.5em 0 0 0;
-}
-
-a {
-	color: #3b8bba; /* block-background-text-normal */
-	text-decoration: none;
-}
-
-a:visited {
-	color: #265778; /* block-normal-text-normal */
-}
-
-label {
-	font-weight:bold;
-}
-
-
-/* --------------------------
- * Layout Styles
- * --------------------------
-*/
-
-/* Apply the .box class on the immediate parent of any grid element (pure-u-*) to apply some padding. */
-.l-box {
-	padding: 1em;
-}
-
-.l-wrap {
-	margin-left: auto;
-	margin-right: auto;
-}
-article .l-wrap {
-	margin-left: -1em;
-	margin-right: -1em;
-}
-
-
-/* --------------------------
- * Header Module Styles
- * --------------------------
-*/
-
-header {
-	font-family: "omnes-pro", sans-serif;
-	max-width: 768px;
-	margin: 0 auto;
-	padding: 1em;
-	text-align: center;
-	border-bottom: 1px solid #eee;
-	background: #fff;
-}
-header h1 {
-	font-size: 200%;
-	font-weight: 100;
-	margin: 0;
-}
-header h2 {
-	font-size: 125%;
-	font-weight: 100;
-	line-height: 1.5;
-	margin: 0;
-	color: #666;
-}
-
-
-/* --------------------------
- * Content Module Styles
- * --------------------------
-*/
-
-/* The content div is placed as a wrapper around all the docs */
-article {
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 1em;
-	padding-right: 1em;
-	max-width: 768px;
-}
-
-/* --------------------------
- * Footer Module Styles
- * --------------------------
-*/
-
-footer {
-	font-size: 87.5%;
-	border-top: 1px solid #eee;
-	padding: 1.1429em;
-	background: rgb(250, 250, 250);
-}
-
-/* Sticky footer: http://ryanfait.com/html5-sticky-footer/ */
-
-* {
-	margin: 0;
-}
-html, body {
-	height: 100%;
-}
-.wrapper {
-	min-height: 100%;
-	height: auto !important;
-	height: 100%;
-	margin: 0 auto -55px; /* the bottom margin is the negative value of the footer's height */
-}
-footer, .push {
-	height: 55px; /* '.push' must be the same height as 'footer' */
-}
-
-/* --------------------------
- * Error Display
- * --------------------------
-*/
-
-.invalid {
-	color:#b94a48;
-	border-color:#ee5f5b.
-}
-.error {
-	color: #ee5f5b;
-}
-
-/* --------------------------
- * Radio button
- * --------------------------
-*/
-
-.form-inline {display: inline-block; float: left;}
-
-.pure-form .pure-radio {
-	margin: 0.5em 1em;
-	display: inline-block;
-}
-
-input[type=checkbox], input[type=radio] {
-	margin-right: 1em;
-}
-
-/* --------------------------
- * Select
- * --------------------------
-*/
-
-/* Fix select being to low in Android Webkit. Removes arrows */
-select {
-	-webkit-appearance: listbox;
-}
-
-/* --------------------------
- * Number - Range
- * --------------------------
-*/
-
-.pure-u-1-4 > .l-box {padding-left: 0; padding-right: 0;}
-.pure-u-3-4 > .l-box {padding-left: 0; padding-right: 2em}
-
-input[type='range'] {
-	-webkit-appearance: none !important;
-	-webkit-border-radius: 5px;
-	-webkit-box-shadow: inset 0 0 5px #333;
-	background-color: #E6E6E6;
-	display: block;
-	height: 0.5em;
-	left: 0.5em;
-	margin: 1.125em;
-	position: relative;
-	right: 0.5em;
-}
-input[type='range']::-webkit-slider-thumb {
-	-webkit-appearance: none !important;
-	-webkit-border-radius: 10px;
-	background-color: #AAA;
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#EEE), to(#AAA));
-	border: 1px solid #999;
-	height: 2em;
-	width: 2em;
-}
-
-/* --------------------------
- * Button
- * --------------------------
-*/
-
-button {width: 45%}
-
-@media only screen and (max-width :480px)
-{.pure-form button[type=submit]{margin:0}}
-
-#save {float: left;}
-#cancel {float: right;}
-
-/* --------------------------
- * Styles
- * --------------------------
-*/
-#log {
-	margin: 0.5em 0
-}
-
-#description {
-	padding-top: 1em;
-}
-
-.is-center {
-	text-align: center;
-}
-
-div.clear {
-	clear: both;
-}
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js"></script>
+	<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+	<style type="text/css">
+	
 	</style>
 </head>
+
 <body>
-	<div class="wrapper">
-		<header>
+	<div data-role="page" id="configuration">
+		<div data-role="header" id="header">
+			<button id="b-cancel" data-icon="delete" data-iconpos="left" data-inline="true" data-mini="true">Cancel</button>
 			<h1>HopPicker</h1>
-		</header>
-		<article>
-			
-			<form class="pure-form pure-form-stacked">
-				<fieldset>
-					<div class="pure-control-group">
-						<h4>Black & White</h4>
-						<div class="description"></div>
-						<label for="color-off" class="pure-radio">
-							<input id="color-off" type="radio" name="color" value="0" data-exclude checked>
-							OFF
-						</label>
-						<label for="color" class="pure-radio">
-							<input id="color" type="radio" name="color" value="1">
-							ON
-						</label>
-						<script type="text/javascript">
-						document.querySelector("#color").checked = false;
-						</script>
-					</div>
-					<div class="pure-control-group">
-						<h4>Inverted</h4>
-						<div class="description"></div>
-						<label for="inverted-off" class="pure-radio">
-							<input id="inverted-off" type="radio" name="inverted" value="0" data-exclude checked>
-							OFF
-						</label>
-						<label for="inverted" class="pure-radio">
-							<input id="inverted" type="radio" name="inverted" value="1">
-							ON
-						</label>
-						<script type="text/javascript">
-						document.querySelector("#inverted").checked = false;
-						</script>
-					</div>
-					<div class="pure-control-group">
-						<h4>Display the date</h4>
-						<div class="description"></div>
-						<label for="date-off" class="pure-radio">
-							<input id="date-off" type="radio" name="date" value="0" data-exclude checked>
-							OFF
-						</label>
-						<label for="date" class="pure-radio">
-							<input id="date" type="radio" name="date" value="1">
-							ON
-						</label>
-						<script type="text/javascript">
-						document.querySelector("#date").checked = false;
-						</script>
-					</div>
-					<div class="pure-control-group">
-						<h4>Choose the hand</h4>
-						<div class="description"></div>
-						<select id="hand" class="pure-input-1" name="hand">
-							<option value="0">Line</option>
-							<option value="1">Arrow</option>
-						</select>
-						<script type="text/javascript">
-						document.querySelector("#hand").value = 0;
-						</script>
-					</div>
-					<div class="pure-control-group">
-						<h4>Display the next calendar event</h4>
-						<div class="description"></div>
-						<label for="calendar-off" class="pure-radio">
-							<input id="calendar-off" type="radio" name="calendar" value="0" data-exclude checked>
-							OFF
-						</label>
-						<label for="calendar" class="pure-radio">
-							<input id="calendar" type="radio" name="calendar" value="1">
-							ON
-						</label>
-						<script type="text/javascript">
-						document.querySelector("#calendar").checked = false;
-						</script>
-						<button class="pure-button" id="btn-login">Log in</button>
-					</div>
-					<div class="pure-control-group">
-						<h4>access_token</h4>
-						<div class="description"></div>
-						<input id="access_token" class="pure-input-1" type="text" name="access_token" value="" maxlength="116">
-					</div>
-					<div class="pure-control-group">
-						<h4>refresh_token</h4>
-						<div class="description"></div>
-						<input id="refresh_token" class="pure-input-1" type="text" name="refresh_token" value="" maxlength="116">
-					</div>
-				</fieldset>
-				<div class="buttons">
-					<button id="save" class="pure-button pure-button-primary" type="submit">Save</button>
-					<button id="cancel" class="pure-button" type="reset">Cancel</button>
+		</div>
+		<div role="main" class="ui-content">
+			<form id="configuration-form">
+				
+				<div class="ui-field-contain">
+					<label for="color">Black & White</label>
+					<input type="checkbox" data-role="flipswitch" name="color" id="color" data-on-text="ON" data-off-text="OFF" data-wrapper-class="color-size-flipswitch">
 				</div>
-				<div class="clear"></div>
+				<div class="ui-field-contain">
+					<label for="inverted">Inverted</label>
+					<input type="checkbox" data-role="flipswitch" name="inverted" id="inverted" data-on-text="ON" data-off-text="OFF" data-wrapper-class="inverted-size-flipswitch">
+				</div>
+				<div class="ui-field-contain">
+					<label for="date">Display the date</label>
+					<input type="checkbox" data-role="flipswitch" name="date" id="date" data-on-text="ON" data-off-text="OFF" data-wrapper-class="date-size-flipswitch">
+				</div>
+				<div class="ui-field-contain">
+					<label for="hand">Choose the hand</label>
+					<select name="hand" id="hand">
+						<option value="0">LINE</option>
+						<option value="1">ARROW</option>
+					</select>
+				</div>
+				<div class="ui-field-contain">
+					<label for="calendar">Display the next calendar event</label>
+					<input type="checkbox" data-role="flipswitch" name="calendar" id="calendar" data-on-text="ON" data-off-text="OFF" data-wrapper-class="calendar-size-flipswitch">
+				</div>
+				<button data-theme="a" id="btn-login">Log in</button>
+				<div class="ui-field-contain">
+					<!-- <label for="access_token">access_token</label> -->
+					<input type="hidden" name="access_token" id="access_token" value="" maxlength="116" data-clear-btn="true">
+				</div>
+				<div class="ui-field-contain">
+					<!-- <label for="refresh_token">refresh_token</label> -->
+					<input type="hidden" name="refresh_token" id="refresh_token" value="" maxlength="116" data-clear-btn="true">
+				</div>
+				
+				<button id="b-submit" data-theme="b" data-icon="check" data-iconpos="right">Save</button>
 			</form>
-			<div id="log"></div>
-			<div class="push"></div>
-		</article>
+		</div>
+		<div data-role="footer" id="footer" data-position="fixed">
+			<h2>Powered by Pebble Autoconfig</h2>
+		</div>
 	</div>
-	<footer class="l-box is-center">
-		Powered by Pebble Autoconfig
-	</footer>
-	<script type="text/javascript">
-/* --------------------------
- * Validation
- * --------------------------
-*/
-function validate() {
-	var parent = findParentByClassName(this, "pure-control-group");
-	var errorNode = parent.querySelector( ".error" ),
-	span = document.createElement( "span" );
+	<script type="text/javascript">	 
+	// this.getUrlParams = function () {
+	// 	var params = {};
+	// 	var bits = window.location.href.replace(/[?&#]+([^=&]+)=([^&]*)/g, function (match, key, value) {
+	// 		params[key] = value;
+	// 	});
+	// 	log("URL parameters: " + JSON.stringify(params, null, 1));
+	// 	return params;
+	// };
 
-	this.classList.remove( "invalid" );
-	if ( errorNode ) {
-		errorNode.parentNode.removeChild( errorNode );
-	}
-
-	if ( !this.validity.valid ) {
-		this.classList.add( "invalid" );
-		parent.appendChild( span );
-		span.classList.add( "error" );
-		span.innerHTML = this.validationMessage != "" ? this.validationMessage : "Please match the requested format.";
-	}
-};
-
-var form = document.querySelector( "form" ),
-inputs = form.querySelectorAll( "input" );
-
-for ( var i = 0; i < inputs.length; i++ ) {
-	inputs[ i ].addEventListener( "blur", validate );
-	inputs[ i ].addEventListener( "invalid", validate );
-};
-
-form.addEventListener( "invalid", function( event ) {
-	event.preventDefault();
-}, true );
-
-/* checkValidity() always returns true in Android Webkit, this check works */
-HTMLFormElement.prototype.checkValidityAndroid=function() {
-	var inputs = this.querySelectorAll( "input" );
-	for ( var i = 0; i < inputs.length; i++ ) {
-		if(!inputs[i].validity.valid) {
-			return false;
-		}
-	}
-	return true;
-};
-/**
- * This is a modified version of PConfig
- * PConfig is copyright (c) 2013 Matthew Congrove (http://github.com/mcongrove)
- */
-var PConfig = function () {
-	this.init = function () {
-		this.setFormValues();
-	};
-	this.getUrlParams = function () {
-		var params = {};
-		var bits = window.location.href.replace(/[?&#]+([^=&]+)=([^&]*)/g, function (match, key, value) {
-			params[key] = value;
-		});
-		log("URL parameters: " + JSON.stringify(params, null, 1));
-		return params;
-	};
-	this.getFormFields = function () {
-		var field_ids = [];
-		var fields_input = document.getElementsByTagName("input");
-		var fields_select = document.getElementsByTagName("select");
-		var fields_textarea = document.getElementsByTagName("textarea");
-		for (var i = 0, x = fields_input.length; i < x; i++) {
-			if (fields_input[i].type != "submit" && fields_input[i].type != "reset" && !fields_input[i].hasAttribute("data-exclude")) {
-				field_ids.push(fields_input[i].id);
-			}
-		}
-		for (var i = 0, x = fields_select.length; i < x; i++) {
-			field_ids.push(fields_select[i].id);
-		}
-		for (var i = 0, x = fields_textarea.length; i < x; i++) {
-			field_ids.push(fields_textarea[i].id);
-		}
-		return field_ids;
-	};
-	this.getFormValues = function () {
-		var fields = this.getFormFields();
-		var values = {};
-		for (var i = 0, x = fields.length; i < x; i++) {
-			var field = document.getElementById(fields[i]);
-			if (field.type == "radio") {
-				var value = field.checked ? 1 : 0;
-			} else {
-				var value = field.value;
-			}
-
-			if (field.type == "number" || field.type == "select-one") {
-				value = parseInt(value);
-			}
-
-			values[fields[i]] = value;
-		}
-		log("Response data: " + JSON.stringify(values, null, 1));
-		return values;
-	};
-	this.setFormValues = function () {
-		
-		var params = this.getUrlParams();
-		
-		for (key in params) {
-			var field = document.getElementById(key);
-			if (field != null) {
-				if (field.type == "radio") {
-					var radios = document.getElementsByName(field.name);
-					for (var i = 0; i < radios.length; i++) {
-						if(radios[i].value == params[key]) {
-							radios[i].checked = true;
-						}
-					};
-					
+			var opts = {}
+			function updateControls() {
+				console.log("updateControls");
+				console.log(window.location.hash.substring(1));
+				// try {
+				// 	opts = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
+				// } catch(e) {
+				// 	console.log(e);
+				// }
+				var bits = window.location.href.replace(/[?&#]+([^=&]+)=([^&]*)/g, function (match, key, value) {
+					opts[key] = value;
+				});
+				console.log(opts);
+				if(opts.access_token){
+					$("#access_token").val(opts.access_token);
+				}
+				if(opts.refresh_token){
+					$("#refresh_token").val(opts.refresh_token);
+				}
+				if(opts.access_token) { // TODO: check token validity
+			//		$("#btn-login").hide();
 				} else {
-					field.value = decodeURIComponent(params[key]);
+			//		$("#btn-logout").hide();
 				}
 			}
+
+		$().ready(function() {	  
+			var dictionary;
+			try {
+				dictionary = JSON.parse(localStorage['HopPicker']);
+			} catch(e) {
+				dictionary = {};
+			}
+			
+			
+			if(!dictionary.hasOwnProperty('color')) {
+				dictionary['color'] = false;
+			}
+			$('#color').prop('checked', (dictionary['color'])).flipswitch( "refresh" );
+			if(!dictionary.hasOwnProperty('inverted')) {
+				dictionary['inverted'] = false;
+			}
+			$('#inverted').prop('checked', (dictionary['inverted'])).flipswitch( "refresh" );
+			if(!dictionary.hasOwnProperty('date')) {
+				dictionary['date'] = false;
+			}
+			$('#date').prop('checked', (dictionary['date'])).flipswitch( "refresh" );
+			if(!dictionary.hasOwnProperty('hand')) {
+				dictionary['hand'] = '0';
+			}
+			$('#hand').val(dictionary['hand'].toString()).selectmenu('refresh');
+			if(!dictionary.hasOwnProperty('calendar')) {
+				dictionary['calendar'] = false;
+			}
+			$('#calendar').prop('checked', (dictionary['calendar'])).flipswitch( "refresh" );
+			if(!dictionary.hasOwnProperty('access_token')) {
+				dictionary['access_token'] = '';
+			}
+			$('#access_token').val(dictionary['access_token']);
+			// $.validator.addMethod("access_token", function(value, element) {
+			// 	return this.optional(element) ;
+			// }, "Text field is invalid.");
+			if(!dictionary.hasOwnProperty('refresh_token')) {
+				dictionary['refresh_token'] = '';
+			}
+			$('#refresh_token').val(dictionary['refresh_token']);
+			// $.validator.addMethod("refresh_token", function(value, element) {
+			// 	return this.optional(element) ;
+			// }, "Text field is invalid.");
+
+			updateControls();
+		});
+		
+		// Handle different UI on i-devices
+		if( /iPhone|iPad|iPod/i.test(navigator.userAgent) ) {
+			$("#header").remove();
 		}
-	};
-};
-PConfig = new PConfig();
-/* --------------------------
- * Pebble Autoconfig
- * --------------------------
-*/
-PConfig.init();
+		
+		$("form :input").on("keypress", function(e) {
+			return e.keyCode != 13;
+		});
+		
+		$("#configuration-form").validate({
+			rules: {
+				
+				access_token: "required access_token",
+				
+				refresh_token: "required refresh_token",
+				
+				
+			},
+			errorPlacement: function(error, element) {
+				error.insertAfter( element.parent() );
+			}
+		});
 
-/* Initialize all range sliders */
-var numberElements = document.querySelectorAll('input[type="number"]');
-
-for ( var i = 0; i < numberElements.length; i++ ) {
-	var parent = findParentByClassName(numberElements[i], "pure-g");
-	var node = parent.querySelector('input[type="range"]');
-	node.value = numberElements[i].value;
-}
-
-/* --------------------------
- * Helpers
- * --------------------------
-*/
-
-if( /iPhone|iPad|iPod/i.test(navigator.userAgent) ) {
-	var element = document.querySelector("header");
-	element.parentNode.removeChild(element);
-}
-
-function findParentByClassName(node, className) {
-	if (node.classList.contains(className)) {
-		return node;
-	} else {
-		if (node.parentNode != null) {
-			return findParentByClassName(node.parentNode, className);
-		} else {
-			return null;
-		}
-	}
-}
-
-function log (text) {
-}
-
-/* --------------------------
- * Number + Range
- * --------------------------
-*/
-
-if(document.querySelector('input[type="number"]') != null) {
-	document.querySelector('input[type="number"]').addEventListener('blur', function (event) {
-		var parent = findParentByClassName(this, "pure-g");
-		var node = parent.querySelector('input[type="range"]');
-		node.value = this.value;
-	});
-
-	document.querySelector('input[type="range"]').addEventListener('change', function (event) {
-		var parent = findParentByClassName(this, "pure-g");
-		var node = parent.querySelector('input[type="number"]');
-		node.value = this.value;
-	});
-}
-
-/* --------------------------
- * Buttons
- * --------------------------
-*/
-
-document.getElementById("save").addEventListener("click", function (event) {
-	log("Save clicked");
-	var form = document.querySelector("form");
-	if (form.checkValidity() && form.checkValidityAndroid()) {
-		location.href = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(PConfig.getFormValues()));
-	}
-	event.preventDefault();
-});
-
-document.getElementById('cancel').addEventListener('click', function (event) {
-	event.preventDefault();
-	log("Cancel clicked");
-	location.href = 'pebblejs://close#';
-	
-});
-
-function EncodeQueryData(data)
-{
-   var ret = [];
-   for (var d in data)
-      ret.push(encodeURIComponent(d) + "=" + encodeURIComponent(data[d]));
-   return ret.join("&");
-}
-
-/** Log into Google account
+		/** Log into Google account
 			 */
 			function doLogin() {
-				var params = {
-          				response_type : "code",
-          				scope : "https://www.googleapis.com/auth/calendar.readonly",
-          				access_type : "offline",
-          				approval_prompt : "force"
-				};
-				window.location = "auth?" + EncodeQueryData(params);
+				window.location = "auth?" + $.param({
+						response_type: "code",
+						scope: "https://www.googleapis.com/auth/calendar.readonly",
+						state: "",
+						access_type: "offline",
+						approval_prompt: "force", // If user tries to authenticate then we have no valid refresh tokens.
+						include_granted_scopes: "true",
+				});
 			}
-			/** Invalidate and forget login credentials
-			 */
-			// function doLogout() {
-			// 	var returl = "pebblejs://close#"+JSON.stringify({logout:true});
-			// 	// $.ajax({
-			// 	// 		dataType: "json",
-			// 	// 		url: "https://accounts.google.com/o/oauth2/revoke",
-			// 	// 		data: {token: $("#access_token").val()},
-			// 	// 		success: function(answer) {
-			// 	// 			alert("Logged out. "+opts.access_token);
-			// 	// 			window.location = returl;
-			// 	// 		},
-			// 	// 		error: function() {
-			// 	// 			alert("Error. Dropping credentials. "+opts.access_token);
-			// 	// 			window.location = returl;
-			// 	// 		},
-			// 	// });
-			// }
 
-			// var opts = {}
-			// function updateControls() {
-			// 	try {
-			// 		opts = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
-			// 	} catch(e) {
-			// 		console.log(e);
-			// 	}
-			// 	console.log(opts);
-			// 	$("#option1").val(opts.option1).slider("refresh");
-			// 	$("#access_token").val(opts.access_token);
+			function saveOptions(){
+				var dictionary = {};
+			
+			dictionary['color'] = ($('#color').prop('checked') ? 1 : 0);
+			dictionary['inverted'] = ($('#inverted').prop('checked') ? 1 : 0);
+			dictionary['date'] = ($('#date').prop('checked') ? 1 : 0);
+			dictionary['hand'] = parseInt($('#hand').val());
+			dictionary['calendar'] = ($('#calendar').prop('checked') ? 1 : 0);
+			dictionary['access_token'] = $('#access_token').val();
+			dictionary['refresh_token'] = $('#refresh_token').val();
+			
+			localStorage['HopPicker'] = JSON.stringify(dictionary);
+			}
 
-			// 	console.log("tototototot " + opts.access_token);
-			// 	if(opts.access_token) { // TODO: check token validity
-			// //		$("#btn-login").hide();
-			// 	} else {
-			// //		$("#btn-logout").hide();
-			// 	}
-			// }
+		$('#b-submit').click(function() {
+			if (!$("#configuration-form").valid()) {
+				return false;
+			}
+			
+			saveOptions();
 
-	document.getElementById('btn-login').addEventListener('click', function (event) {
-		event.preventDefault();
-		console.log("Login");
-		doLogin();
-	});
+			var location = "pebblejs://close#" + encodeURIComponent(localStorage['HopPicker']);
+			window.location.href = location;
+		});
+	
+		$('#b-cancel').click(function() {
+			var location = "pebblejs://close#";
+			window.location.href = location;
+		});
 
-	// document.getElementById('btn-logout').addEventListener('click', function (event) {
-	// 	event.preventDefault();
-	// 	console.log("Logout");
-	// 	doLogout();
-	// });
-
-/* --------------------------
- * Debug
- * --------------------------
-*/
-log("User-agent: " + navigator.userAgent );
+		$('#btn-login').click(function() {
+			doLogin();
+		});
 	</script>
 </body>
 </html>

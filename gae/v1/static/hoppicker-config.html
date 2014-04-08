@@ -64,18 +64,10 @@
 			 */
 			function doLogin() {
 				window.location = "auth?" + $.param({
-						// client_id : "227364690677-sabcl1gsvsld0pf9ffde5ad8kapi6es3.apps.googleusercontent.com",
           				response_type : "code",
           				scope : "https://www.googleapis.com/auth/calendar.readonly",
-          				// redirect_uri : "http://dl.dropboxusercontent.com/u/20902550/test.html",
-          				access_type : "offline",
+          				//access_type : "offline",
           				approval_prompt : "force"
-						// response_type: "code",
-						// scope: "https://www.googleapis.com/auth/calendar.readonly",
-						// state: "",
-						// access_type: "offline",
-						// approval_prompt: "force", // If user tries to authenticate then we have no valid refresh tokens.
-						// include_granted_scopes: "true",
 				});
 			}
 			/** Invalidate and forget login credentials

@@ -48,9 +48,7 @@ class AuthCallback(webapp2.RequestHandler):
             "grant_type": "authorization_code",
         }
         result = query_json("https://accounts.google.com/o/oauth2/token", q)
-        url = (config.app_config_uri if "access_token" in result
-               else config.auth_failure_page) + "#" + urlencode(result)
-        self.response.location = url
+        self.response.location = config.app_config_uri + "#" + urlencode(result)
         self.response.status_int = 302
         # return result as redirect to static page
 

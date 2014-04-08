@@ -5,18 +5,19 @@ static Window *window;
 static Layer  *layer;
 static InverterLayer* inverter_layer;
 
+#define EVENTSCOUNT_PKEY 7
+#define EVENTID_PKEY 8
+#define EVENTSTART_PKEY 9
+#define EVENTEND_PKEY 10
+
 GFont custom_font;
 GFont small_font;
 
-static GPath *hour_arrow[2];
-static const GPathInfo LINE_HAND_POINTS[2] = {
-	{4,(GPoint []) {{-3, 0},{-3, -300},{3, -300},{3, 0}}},
-	{4,(GPoint []) {{-3, 0},{3, 0},{3, -300},{-3, -300}}}
-};
-static const GPathInfo ARROW_HAND_POINTS[2] = {
-	{4,(GPoint []) {{-6, 0},{-2, -175},{2, -175},{6, 0}}},
-	{4,(GPoint []) {{-6, 0},{6, 0},{2, -175},{-2, -175}}}
-};
+static GPath *hour_arrow;
+static const GPathInfo LINE_HAND_POINTS = 
+	{4,(GPoint []) {{-3, 0},{-3, -300},{3, -300},{3, 0}}};
+static const GPathInfo ARROW_HAND_POINTS =
+	{4,(GPoint []) {{-6, 0},{-2, -175},{2, -175},{6, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
 
@@ -28,7 +29,8 @@ static int anim_minutes = 0;
 static bool isAnimating = false;
 static int increaseAnimation = 20;
 
-
+static int eventsCount = 0;
+static int32_t dates[6][2];
 
 static bool containsCircle(GPoint center, int radius){
 	return center.x - radius > 0 && center.x + radius < 144 && center.y - radius > 0 && center.y + radius < 168;
@@ -131,11 +133,43 @@ static void drawHand(GPoint secondHand, int angle, GContext *ctx){
 	graphics_context_set_stroke_color(ctx, getColor() ? GColorBlack : GColorWhite);
 	graphics_context_set_fill_color(ctx, getColor() ? GColorWhite : GColorBlack);
 	
-	for(int i=0; i<2; i++){
-		gpath_move_to(hour_arrow[i], secondHand);
-		gpath_rotate_to(hour_arrow[i], angle);
-		gpath_draw_filled(ctx, hour_arrow[i]);
-		gpath_draw_outline(ctx, hour_arrow[i]);
+	gpath_move_to(hour_arrow, secondHand);
+	gpath_rotate_to(hour_arrow, angle);
+	gpath_draw_filled(ctx, hour_arrow);
+	gpath_draw_outline(ctx, hour_arrow);
+
+}
+
+static void drawCalendarEvents(GPoint center, GContext *ctx){
+	GPoint segD;
+	
+	const int16_t secondHandLengthD = 195;
+	
+	time_t now = time(NULL);
+	struct tm *t = localtime(&now);
+	now = now - t->tm_min * 60 - t->tm_sec;
+
+	// asctime
+	
+	for(time_t i=now-3600*2; i<now+3600*2; i=i+60*5){
+		t = localtime(&i);
+		// APP_LOG(APP_LOG_LEVEL_DEBUG, "Times %s",asctime(t)); 
+
+		int32_t angle = TRIG_MAX_ANGLE * ((t->tm_hour % 12) * 60 + t->tm_min) / (12 * 60);
+
+		for(int j=0; j<eventsCount; j++){
+
+			if(dates[j][0]<=(int)i && (int)i<=dates[j][1]){
+				segD.y = (int16_t)(-cos_lookup(angle) * (int32_t)(secondHandLengthD + j*5) / TRIG_MAX_RATIO) + center.y;
+				segD.x = (int16_t)(sin_lookup(angle) * (int32_t)(secondHandLengthD + j*5) / TRIG_MAX_RATIO) + center.x;
+
+				graphics_context_set_fill_color(ctx, getColor() ? GColorBlack : GColorWhite);
+				graphics_fill_circle(	ctx, segD, 3);
+				graphics_context_set_fill_color(ctx, getColor() ? GColorWhite : GColorBlack);
+				graphics_fill_circle(	ctx, segD, 2);
+			}
+
+		}
 	}
 }
 
@@ -176,6 +210,8 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	drawClock(secondHand, hours, ctx);
 	
 	drawHand(secondHand, second_angle, ctx);
+
+	drawCalendarEvents(secondHand, ctx);
 
 	if(getDate()){
 		drawDate(secondHand, second_angle, t->tm_mday, ctx);
@@ -240,23 +276,63 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   // call autoconf_in_received_handler
 	autoconfig_in_received_handler(iter, context);
 
-	for(int i=0; i<2; i++){
-		gpath_destroy(hour_arrow[i]);
+	Tuple *tuple = NULL;
+	tuple = dict_find(iter, EVENTSCOUNT_PKEY);
+	if(tuple){
+		eventsCount = tuple->value->int32;
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "EVENTSCOUNT_PKEY %d",eventsCount); 
+		memset(dates, 0, 6*2*sizeof(int32_t));
 	}
-	if(getHand() == HAND_LINE){
-		for(int i=0; i<2; i++){
-			hour_arrow[i] = gpath_create(&LINE_HAND_POINTS[i]);
+
+	tuple = dict_find(iter, EVENTID_PKEY);
+	if(tuple){
+		int id = tuple->value->int32;
+
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "EVENTID_PKEY %d",id); 
+
+		tuple = dict_find(iter, EVENTSTART_PKEY);
+		if(tuple){
+			dates[id][0] = tuple->value->int32;
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "EVENTSTART_PKEY %d %d",id,(int)dates[id][0]); 
 		}
+
+		tuple = dict_find(iter, EVENTEND_PKEY);
+		if(tuple){
+			dates[id][1] = tuple->value->int32;
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "EVENTSTART_PKEY %d %d",id,(int)dates[id][1]); 
+		}
+
+		time_t now = time(NULL);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "NOW %d",(int)now); 
+
+	}
+
+	gpath_destroy(hour_arrow);
+	
+	if(getHand() == HAND_LINE){
+		hour_arrow = gpath_create(&LINE_HAND_POINTS);
 	}
 	else {
-		for(int i=0; i<2; i++){
-			hour_arrow[i] = gpath_create(&ARROW_HAND_POINTS[i]);
-		}
+		hour_arrow = gpath_create(&ARROW_HAND_POINTS);
 	}
 
 	layer_set_hidden(inverter_layer_get_layer(inverter_layer), !getInverted());
 	layer_mark_dirty(layer);
 }
+
+static void handle_accel_tap(AccelAxisType axis, int32_t direction)
+{
+   APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_accel_tap"); 
+	DictionaryIterator *iter;
+	
+	app_message_outbox_begin(&iter);
+
+	const time_t now = time(NULL);
+	dict_write_int32(iter, CALENDAR_PKEY, (int)now);
+
+	dict_write_end(iter);
+  	app_message_outbox_send();
+}  
 
 static void init(void) {
 	autoconfig_init();
@@ -272,17 +348,15 @@ static void init(void) {
 	small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_18));
 
 	if(getHand() == HAND_LINE){
-		for(int i=0; i<2; i++){
-			hour_arrow[i] = gpath_create(&LINE_HAND_POINTS[i]);
-		}
+		hour_arrow = gpath_create(&LINE_HAND_POINTS);
 	}
 	else {
-		for(int i=0; i<2; i++){
-			hour_arrow[i] = gpath_create(&ARROW_HAND_POINTS[i]);
-		}
+		hour_arrow = gpath_create(&ARROW_HAND_POINTS);
 	}
 
 	app_message_register_inbox_received(in_received_handler);
+
+	accel_tap_service_subscribe(&handle_accel_tap);
 
 	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
 
@@ -293,9 +367,7 @@ static void deinit(void) {
 	autoconfig_deinit();
 	fonts_unload_custom_font(custom_font);
 	fonts_unload_custom_font(small_font);
-	for(int i=0; i<2; i++){
-		gpath_destroy(hour_arrow[i]);
-	}
+	gpath_destroy(hour_arrow);
 	window_destroy(window);
 }
 

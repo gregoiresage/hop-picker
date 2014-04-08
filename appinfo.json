@@ -5,7 +5,15 @@
         "color": 0,
         "inverted": 1,
         "date": 2,
-        "hand" : 3
+        "hand" : 3,
+        "calendar" : 4,
+        "access_token" : 5,
+        "refresh_token" : 6,
+        "eventsCount" : 7,
+        "eventId" : 8,
+        "eventStart" : 9,
+        "eventEnd" : 10,
+        "eventSummary" : 11
     },
     "longName": "HopPicker",
     "versionCode": 11,
@@ -34,7 +42,7 @@
         ]
     },
     "preferences": {
-    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker2.html",
+    "url" : "http://pebble-hoppicker.appspot.com/v1/autoconfig.html",
     "items": [{
         "name":     "color",
         "title":    "Black & White",
@@ -72,6 +80,30 @@
         "type":   "enum",
         "choices":  {"LINE":"Line", "ARROW":"Arrow"},
         "default":  0
+    }
+    ,
+    {
+        "name":     "calendar",
+        "title":    "Display the next calendar event",
+        "subtitle": "You must allow the",
+        "type":   "boolean",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": false
+    }
+    ,
+    {
+        "name": "access_token",
+        "title": "access_token",
+        "type": "string",
+        "max-length": 116
+    }
+    ,
+    {
+        "name": "refresh_token",
+        "title": "refresh_token",
+        "type": "string",
+        "max-length": 116
     }
   ]
   }
