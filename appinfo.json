@@ -7,7 +7,8 @@
         "date": 2,
         "hand" : 3,
         "vibrate_on_bt_lost" : 4,
-        "display_bt_icon" : 5
+        "display_bt_icon" : 5,
+        "animated" : 6
     },
     "longName": "HopPicker",
     "versionCode": 12,
@@ -41,7 +42,7 @@
         ]
     },
     "preferences": {
-    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker3.html",
+    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker4.html",
     "items": [{
         "name":     "color",
         "title":    "Black & White",
@@ -60,6 +61,16 @@
         "off-text": "OFF",
         "on-text": "ON",
         "default": false
+    }
+    ,
+    {
+        "name":     "animated",
+        "title":    "Animation",
+        "subtitle": "",
+        "type":   "boolean",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": true
     }
     ,
     {

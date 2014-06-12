@@ -99,7 +99,7 @@ static void drawClock(GPoint center, int hour, GContext *ctx){
 		}
 		else {
 			graphics_context_set_fill_color(ctx, getColor() ? GColorWhite : GColorBlack);
-			graphics_fill_circle(	ctx, segC, 3);
+			graphics_fill_circle(	ctx, segC, 4);
 		}
 	}
 }
@@ -212,7 +212,7 @@ static void window_load(Window *window) {
 }
 
 static void window_appear(Window *window){
-	isAnimating = true;
+	isAnimating = getAnimated();
 	time_t now = time(NULL);
 	struct tm *t = localtime(&now);
 
