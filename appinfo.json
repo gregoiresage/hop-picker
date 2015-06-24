@@ -1,116 +1,121 @@
 {
-    "versionLabel": "1.1.0",
-    "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
-    "appKeys": {
-        "color": 0,
-        "inverted": 1,
-        "date": 2,
-        "hand" : 3,
-        "vibrate_on_bt_lost" : 4,
-        "display_bt_icon" : 5,
-        "animated" : 6
-    },
-    "longName": "HopPicker",
-    "versionCode": 12,
-    "capabilities": [
-        "configurable"
-    ],
-    "shortName": "HopPicker",
-    "companyName": "Gregoire Sage",
-    "watchapp": {
-        "watchface": true
-    },
-    "resources": {
-        "media": [
-            {
-                "characterRegex": "[0-9]",
-                "type": "font",
-                "name": "COMFORTAA_40",
-                "file": "fonts/Comfortaa-Bold.ttf"
-            },
-            {
-                "characterRegex": "[0-9]",
-                "type": "font",
-                "name": "COMFORTAA_18",
-                "file": "fonts/Comfortaa-Bold.ttf"
-            },
-            {
-              "type":"png",
-              "name":"IMAGE_BT_DISCONNECTED",
-              "file":"images/bluetooth_not_connected.png"
-            }
-        ]
-    },
-    "preferences": {
-    "url" : "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker3.html",
-    "items": [{
-        "name":     "color",
-        "title":    "Black & White",
-        "subtitle": "",
-        "type":   "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": false
-    }
-    ,
-    {
-        "name":     "inverted",
-        "title":    "Inverted",
-        "subtitle": "",
-        "type":   "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": false
-    }
-    ,
-    {
-        "name":     "animated",
-        "title":    "Animation",
-        "subtitle": "",
-        "type":   "boolean",
+  "versionLabel": "2.0",
+  "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
+  "appKeys": {
+    "date": 2,
+    "hand": 3,
+    "vibrate_on_bt_lost": 4,
+    "display_bt_icon": 5,
+    "animated": 6,
+    "hand_color": 7,
+    "color_theme": 8
+  },
+  "longName": "HopPicker",
+  "versionCode": 13,
+  "capabilities": [
+    "configurable"
+  ],
+  "shortName": "HopPicker",
+  "companyName": "Gregoire Sage",
+  "watchapp": {
+    "watchface": true
+  },
+  "resources": {
+    "media": [
+      {
+        "characterRegex": "[0-9]",
+        "type": "font",
+        "name": "COMFORTAA_40",
+        "file": "fonts/Comfortaa-Bold.ttf"
+      },
+      {
+        "characterRegex": "[0-9]",
+        "type": "font",
+        "name": "COMFORTAA_18",
+        "file": "fonts/Comfortaa-Bold.ttf"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BT_DISCONNECTED",
+        "file": "images/bluetooth_not_connected.png"
+      }
+    ]
+  },
+  "preferences": {
+    "embedded": true,
+    "url": "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker3.html",
+    "items": [
+      {
+        "name": "color_theme",
+        "title": "Color Style",
+        "type": "enum",
+        "choices": {
+          "DARK": "Dark",
+          "CLEAR": "Clear"
+        },
+        "default": 0
+      },
+      {
+        "name": "hand_color",
+        "title": "Watch hand color",
+        "type": "enum",
+        "choices": {
+          "WHITE": "White",
+          "BLACK": "Black",
+          "RED": "Red",
+          "BLUE": "Blue",
+          "ORANGE": "Orange",
+          "MAGENTA": "Magenta",
+          "GREEN": "Green"
+        },
+        "default": 2
+      },
+      {
+        "name": "hand",
+        "title": "Watch hand style",
+        "type": "enum",
+        "choices": {
+          "LINE": "Line",
+          "ARROW": "Arrow"
+        },
+        "default": 0
+      },
+      {
+        "name": "animated",
+        "title": "Startup animation",
+        "type": "boolean",
         "off-text": "OFF",
         "on-text": "ON",
         "default": true
-    }
-    ,
-    {
-        "name":     "date",
-        "title":    "Display the date",
-        "subtitle": "",
-        "type":   "boolean",
+      },
+      {
+        "name": "date",
+        "title": "Display the date",
+        "type": "boolean",
+        "off-text": "OFF",
+        "on-text": "ON",
+        "default": true
+      },
+      {
+        "name": "vibrate_on_bt_lost",
+        "title": "Vibrate on Bluetooth disconnection",
+        "type": "boolean",
         "off-text": "OFF",
         "on-text": "ON",
         "default": false
-    }
-    ,
-    {
-        "name":     "hand",
-        "title":    "Choose the hand",
-        "subtitle": "",
-        "type":   "enum",
-        "choices":  {"LINE":"Line", "ARROW":"Arrow"},
-        "default":  0
-    }
-    ,
-    {
-        "name":     "vibrate_on_bt_lost",
-        "title":    "Vibrate on Bluetooth disconnection",
-        "subtitle": "",
-        "type":   "boolean",
+      },
+      {
+        "name": "display_bt_icon",
+        "title": "Display icon on Bluetooth disconnection",
+        "type": "boolean",
         "off-text": "OFF",
         "on-text": "ON",
-        "default": false
-    }
-    ,
-    {
-        "name":     "display_bt_icon",
-        "title":    "Display icon on Bluetooth disconnection",
-        "subtitle": "",
-        "type":   "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": false
-    }
-  ]
-  }
+        "default": true
+      }
+    ]
+  },
+  "targetPlatforms": [
+    "basalt","aplite"
+  ],
+  "sdkVersion": "3"
 }
