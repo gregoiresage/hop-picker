@@ -43,7 +43,6 @@
   },
   "preferences": {
     "embedded": true,
-    "url": "http://dl.dropboxusercontent.com/u/20902550/config_hoppicker3.html",
     "items": [
       {
         "name": "color_theme",
