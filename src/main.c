@@ -7,22 +7,20 @@ static Layer  *layer = NULL;
 
 static GBitmap *bt_disconnected = NULL;
 
-GFont custom_font;
-GFont small_font;
+static GFont custom_font;
+static GFont small_font;
 
 static GPath *hour_arrow;
 static const GPathInfo LINE_HAND_POINTS =  {4,(GPoint []) {{-4, 0},{-4, -300},{4, -300},{4, 0}}};
 static const GPathInfo ARROW_HAND_POINTS = {4,(GPoint []) {{-9, 0},{-2, -175},{2, -175},{9, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
-
 static char date_text[3] = "31";
 
-static AppTimer *timer;
+static Animation* animation;
+static AnimationImplementation animImpl;
 
-static int anim_minutes = 0;
 static bool isAnimating = false;
-static int increaseAnimation = 20;
 static uint8_t percent = 100;
 
 static bool btConnected = false;
@@ -39,6 +37,12 @@ static int day = 0;
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
 
+#define DATE_OUTER_RADIUS 17
+#define DATE_INNER_RADIUS 13
+
+#define SMALL_DOT_RADIUS 3
+#define BIG_DOT_RADIUS 6
+
 static bool containsCircle(GPoint center, int radius){
 	return center.x - radius > 0 && center.x + radius < 144 && center.y - radius > 0 && center.y + radius < 168;
 }
@@ -51,13 +55,28 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 		layer_mark_dirty(layer);
 }
 
-static void animation_timer_callback(void *data) {
-	timer = NULL;
+#ifdef PBL_COLOR
+static void animationUpdate(Animation *animation, const AnimationProgress progress) {
+#else
+static void animationUpdate(Animation *animation, const uint32_t progress) {
+#endif
+	percent = progress * 100 / ANIMATION_NORMALIZED_MAX;
 	layer_mark_dirty(layer);
-  	if(isAnimating)
-  		timer = app_timer_register(20 /* milliseconds */, animation_timer_callback, NULL);
-  	percent += 8;
-  	percent = percent > 100 ? 100 : percent;
+}
+
+static void animation_started(Animation *animation, void *data) {
+	percent = 0;
+	isAnimating = true;
+}
+
+static void animation_stopped(Animation *animation, bool finished, void *data) {
+	percent = 100;
+	isAnimating = false;
+	layer_mark_dirty(layer);
+#ifndef PBL_SDK_3
+	animation_destroy(animation);
+	animation = NULL;
+#endif
 }
 
 static void drawClock(GPoint center, GContext *ctx){
@@ -84,9 +103,9 @@ static void drawClock(GPoint center, GContext *ctx){
 			segC.x = (int16_t)(sin_lookup(angle) * SECOND_HAND_LENGTH_C / TRIG_MAX_RATIO) + center.x;
 		}
 		
-		uint8_t radius = i % 4  ? 3 : 6;
+		uint8_t radius = i % 4  ? SMALL_DOT_RADIUS : BIG_DOT_RADIUS;
 
-		if(radius == 6 || containsCircle(segC, radius))
+		if((radius == BIG_DOT_RADIUS) || containsCircle(segC, radius))
 		{
 			graphics_fill_circle(ctx, segC, radius);
 
@@ -111,7 +130,6 @@ static void drawClock(GPoint center, GContext *ctx){
 				}
 			}
 		}
-		
 	}
 }
 
@@ -125,7 +143,7 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 		segA.x = (int16_t)(sin_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.x;
 		posFromCenter--;
 	}
-	while(containsCircle(segA, 17 + 1));
+	while(containsCircle(segA, DATE_OUTER_RADIUS + 1));
 
 	snprintf(date_text, sizeof(date_text), "%d", day); 
 
@@ -133,12 +151,12 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 	graphics_context_set_stroke_color(ctx, fg_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
-	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), 17);
+	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), DATE_OUTER_RADIUS);
 	// graphics_draw_circle(ctx, GPoint(segA.x, segA.y), 15);
 	
 	graphics_context_set_fill_color(ctx, bg_color);
 
-	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), 13);
+	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), DATE_INNER_RADIUS);
 	graphics_draw_text(ctx,
 					date_text,
 					small_font,
@@ -149,15 +167,13 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 }
 
 static void drawHand(GPoint secondHand, int angle, GContext *ctx){
-
-	graphics_context_set_stroke_color(ctx, fg_color);
+	// graphics_context_set_stroke_color(ctx, fg_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
 	gpath_move_to(hour_arrow, secondHand);
 	gpath_rotate_to(hour_arrow, angle);
 	gpath_draw_filled(ctx, hour_arrow);
 	// gpath_draw_outline(ctx, hour_arrow);
-
 }
 
 static void layer_update_proc(Layer *layer, GContext *ctx) {
@@ -166,16 +182,14 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	
 	GPoint secondHand;
 
-	const int16_t secondHandLength = 150;
-
 	int32_t second_angle = TRIG_MAX_ANGLE * ((hours % 12) * 60 + minutes) / (12 * 60);
 
-	secondHand.y = (int16_t)(cos_lookup(second_angle) * (int32_t)secondHandLength / TRIG_MAX_RATIO) + center.y;
-	secondHand.x = (int16_t)(-sin_lookup(second_angle) * (int32_t)secondHandLength / TRIG_MAX_RATIO) + center.x;
+	secondHand.y = (int16_t)(cos_lookup(second_angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.y;
+	secondHand.x = (int16_t)(-sin_lookup(second_angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.x;
 
 	drawClock(secondHand, ctx);
 
-	if(!isAnimating && percent >= 100){
+	if(!isAnimating){
 		drawHand(secondHand, second_angle, ctx);
 
 		if(getDisplay_bt_icon() && !btConnected){
@@ -198,11 +212,7 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 		if(getDate()){
 			drawDate(secondHand, second_angle, ctx);
 		}
-	}
-	else if(percent >= 100) {
-		isAnimating = false;
-	}
-	
+	}	
 }
 
 static void window_load(Window *window) {
@@ -213,32 +223,49 @@ static void window_load(Window *window) {
 	layer_set_update_proc(layer, layer_update_proc);
 	layer_add_child(window_layer, layer);
 
-	timer = app_timer_register(500 /* milliseconds */, animation_timer_callback, NULL);
+	if(getAnimated()){
+		animation = animation_create();
+		animImpl.update = animationUpdate;
+		animation_set_handlers(animation, (AnimationHandlers) {
+			.started = (AnimationStartedHandler) animation_started,
+			.stopped = (AnimationStoppedHandler) animation_stopped,
+		}, NULL);
+	
+		animation_set_delay(animation, 500);
+		animation_set_duration(animation, 700);
+		animation_set_implementation(animation, &animImpl);
+		animation_schedule(animation);
+	}
 }
 
 static void window_unload(Window *window) {
 	layer_destroy(layer);
 }
 
+#ifdef PBL_COLOR
 static GColor getHandColor(int color){
 	switch(color){
 		case HAND_COLOR_WHITE	: return GColorWhite;
 		case HAND_COLOR_BLACK	: return GColorBlack;
-#ifdef PBL_COLOR
 		case HAND_COLOR_RED 	: return GColorRed;
 		case HAND_COLOR_BLUE 	: return GColorVividCerulean;
 		case HAND_COLOR_ORANGE 	: return GColorOrange;
 		case HAND_COLOR_MAGENTA	: return GColorMagenta;
 		case HAND_COLOR_GREEN	: return GColorMalachite;
-#endif
 		default				: return GColorWhite;
 	}
 }
+#endif
 
-static void update_colors(){
-	int theme = getColor_theme();
+static void updateSettings(){
+	gpath_destroy(hour_arrow);
+	switch(getHand()){
+		case HAND_LINE : hour_arrow = gpath_create(&LINE_HAND_POINTS); break;
+		case HAND_ARROW : 
+		default : hour_arrow = gpath_create(&ARROW_HAND_POINTS); break;
+	}
 
-	switch(theme){
+	switch(getColor_theme()){
 		case COLOR_THEME_DARK : 
 			bg_color = GColorBlack;
 			fg_color = GColorWhite;
@@ -263,18 +290,10 @@ static void update_colors(){
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
-  // call autoconf_in_received_handler
+  	// call autoconf_in_received_handler
 	autoconfig_in_received_handler(iter, context);
 
-	gpath_destroy(hour_arrow);
-	if(getHand() == HAND_LINE){
-		hour_arrow = gpath_create(&LINE_HAND_POINTS);
-	}
-	else {
-		hour_arrow = gpath_create(&ARROW_HAND_POINTS);
-	}
-
-	update_colors();
+	updateSettings();
 
 	layer_mark_dirty(layer);
 }
@@ -296,12 +315,7 @@ static void bluetooth_connection_handler(bool connected){
 static void init(void) {
 	autoconfig_init();
 
-	isAnimating = getAnimated();
-	if(isAnimating)
-		percent = 0;
-
 	window = window_create();
-	
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload,
@@ -309,17 +323,12 @@ static void init(void) {
 
 	custom_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_40));
 	small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_18));
-
 	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
 
-	if(getHand() == HAND_LINE){
-		hour_arrow = gpath_create(&LINE_HAND_POINTS);
-	}
-	else {
-		hour_arrow = gpath_create(&ARROW_HAND_POINTS);
-	}
-
 	app_message_register_inbox_received(in_received_handler);
+
+	btConnected = bluetooth_connection_service_peek();
+	bluetooth_connection_service_subscribe(bluetooth_connection_handler);
 
 	tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
 
@@ -327,10 +336,11 @@ static void init(void) {
 	struct tm *t = localtime(&now);
 	handle_minute_tick(t, MINUTE_UNIT);
 
-	btConnected = bluetooth_connection_service_peek();
-	bluetooth_connection_service_subscribe(bluetooth_connection_handler);
+	updateSettings();
 
-	update_colors();
+	isAnimating = getAnimated();
+	if(isAnimating)
+		percent = 0;
 
 	window_stack_push(window, false);
 }
