@@ -33,6 +33,8 @@ static int hours = 0;
 static int minutes = 0;
 static int day = 0;
 
+static int layer_update_count = 0;
+
 #define DATE_POSITION_FROM_CENTER 100
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
@@ -105,7 +107,7 @@ static void drawClock(GPoint center, GContext *ctx){
 		
 		uint8_t radius = i % 4  ? SMALL_DOT_RADIUS : BIG_DOT_RADIUS;
 
-		if((radius == BIG_DOT_RADIUS) || containsCircle(segC, radius))
+		// if((radius == BIG_DOT_RADIUS) || containsCircle(segC, radius))
 		{
 			graphics_fill_circle(ctx, segC, radius);
 
@@ -179,11 +181,28 @@ static void drawHand(GPoint secondHand, int angle, GContext *ctx){
 static void layer_update_proc(Layer *layer, GContext *ctx) {
 	GRect bounds = layer_get_bounds(layer);
 	GPoint center = grect_center_point(&bounds);
-	
-	GPoint secondHand;
 
+	if(isAnimating){
+		if(layer_update_count == 0){
+			layer_mark_dirty(layer);
+		}
+		else if(layer_update_count == 1){
+			animation = animation_create();
+			animImpl.update = animationUpdate;
+			animation_set_handlers(animation, (AnimationHandlers) {
+				.started = (AnimationStartedHandler) animation_started,
+				.stopped = (AnimationStoppedHandler) animation_stopped,
+			}, NULL);
+			animation_set_duration(animation, 500);
+			animation_set_implementation(animation, &animImpl);
+			animation_schedule(animation);
+		}
+		layer_update_count++;
+	}
+	
 	int32_t second_angle = TRIG_MAX_ANGLE * ((hours % 12) * 60 + minutes) / (12 * 60);
 
+	GPoint secondHand;
 	secondHand.y = (int16_t)(cos_lookup(second_angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.y;
 	secondHand.x = (int16_t)(-sin_lookup(second_angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.x;
 
@@ -222,20 +241,6 @@ static void window_load(Window *window) {
 	layer = layer_create(bounds);
 	layer_set_update_proc(layer, layer_update_proc);
 	layer_add_child(window_layer, layer);
-
-	if(getAnimated()){
-		animation = animation_create();
-		animImpl.update = animationUpdate;
-		animation_set_handlers(animation, (AnimationHandlers) {
-			.started = (AnimationStartedHandler) animation_started,
-			.stopped = (AnimationStoppedHandler) animation_stopped,
-		}, NULL);
-	
-		animation_set_delay(animation, 500);
-		animation_set_duration(animation, 700);
-		animation_set_implementation(animation, &animImpl);
-		animation_schedule(animation);
-	}
 }
 
 static void window_unload(Window *window) {
