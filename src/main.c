@@ -25,9 +25,13 @@ static uint8_t percent = 100;
 
 static bool btConnected = false;
 
-static GColor fg_color;
 static GColor bg_color;
+static GColor bg_circle_color;
+static GColor text_and_dots_color;
+static GColor dots_outline_color;
+
 static GColor hand_color;
+static GColor hand_outline_color;
 
 static int hours = 0;
 static int minutes = 0;
@@ -85,9 +89,13 @@ static void drawClock(GPoint center, GContext *ctx){
 	GPoint segA;
 	GPoint segC;
 	
-	graphics_context_set_text_color(ctx, fg_color);
-	graphics_context_set_fill_color(ctx, fg_color);
+	graphics_context_set_fill_color(ctx, bg_circle_color);
+	graphics_fill_circle(ctx, center, SECOND_HAND_LENGTH_C);
 
+	graphics_context_set_text_color(ctx, text_and_dots_color);
+	graphics_context_set_fill_color(ctx, text_and_dots_color);
+	graphics_context_set_stroke_color(ctx, dots_outline_color);
+ 
 	int minhour=(hours+24)-2;
 	int maxhour=hours+24+3;
 	
@@ -110,6 +118,7 @@ static void drawClock(GPoint center, GContext *ctx){
 		// if((radius == BIG_DOT_RADIUS) || containsCircle(segC, radius))
 		{
 			graphics_fill_circle(ctx, segC, radius);
+			graphics_draw_circle(ctx, segC, radius);
 
 			if(!isAnimating && (i % 4 == 0)) {			
 				if(clock_is_24h_style()){
@@ -149,16 +158,21 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 
 	snprintf(date_text, sizeof(date_text), "%d", day); 
 
-	graphics_context_set_text_color(ctx, fg_color);
-	graphics_context_set_stroke_color(ctx, fg_color);
+	graphics_context_set_text_color(ctx, text_and_dots_color);
+	graphics_context_set_stroke_color(ctx, hand_outline_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
 	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), DATE_OUTER_RADIUS);
-	// graphics_draw_circle(ctx, GPoint(segA.x, segA.y), 15);
+	if(!gcolor_equal(hand_outline_color,GColorClear)){
+		graphics_draw_circle(ctx, GPoint(segA.x, segA.y), DATE_OUTER_RADIUS);
+	}
 	
-	graphics_context_set_fill_color(ctx, bg_color);
+	graphics_context_set_fill_color(ctx, bg_circle_color);
 
 	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), DATE_INNER_RADIUS);
+	if(!gcolor_equal(hand_outline_color,GColorClear)){
+		graphics_draw_circle(ctx, GPoint(segA.x, segA.y), DATE_INNER_RADIUS);
+	}
 	graphics_draw_text(ctx,
 					date_text,
 					small_font,
@@ -169,13 +183,17 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 }
 
 static void drawHand(GPoint secondHand, int angle, GContext *ctx){
-	// graphics_context_set_stroke_color(ctx, fg_color);
+	
 	graphics_context_set_fill_color(ctx, hand_color);
-
+	
 	gpath_move_to(hour_arrow, secondHand);
 	gpath_rotate_to(hour_arrow, angle);
 	gpath_draw_filled(ctx, hour_arrow);
-	// gpath_draw_outline(ctx, hour_arrow);
+
+	if(!gcolor_equal(hand_outline_color,GColorClear)){
+		graphics_context_set_stroke_color(ctx, hand_outline_color);
+		gpath_draw_outline(ctx, hour_arrow);
+	}
 }
 
 static void layer_update_proc(Layer *layer, GContext *ctx) {
@@ -273,23 +291,42 @@ static void updateSettings(){
 	switch(getColor_theme()){
 		case COLOR_THEME_DARK : 
 			bg_color = GColorBlack;
-			fg_color = GColorWhite;
+			bg_circle_color = GColorBlack;
+			text_and_dots_color = GColorWhite;
+			dots_outline_color = GColorWhite;
+			hand_color = GColorWhite;
 			break;
 		case COLOR_THEME_CLEAR :
 			bg_color = GColorWhite;
-			fg_color = GColorBlack;
+			bg_circle_color = GColorWhite;
+			text_and_dots_color = GColorBlack;
+			dots_outline_color = GColorBlack;
+			hand_color = GColorBlack;
+			break;
+		case COLOR_THEME_BLACK_ON_WHITE :
+			bg_color = GColorWhite;
+			bg_circle_color = GColorBlack;
+			text_and_dots_color = GColorWhite;
+			dots_outline_color = GColorBlack;
+			hand_color = GColorWhite;
+			break;
+		case COLOR_THEME_WHITE_ON_BLACK :
+			bg_color = GColorBlack;
+			bg_circle_color = GColorWhite;
+			text_and_dots_color = GColorBlack;
+			dots_outline_color = GColorWhite;
+			hand_color = GColorBlack;
 			break;
 	}
 
 #ifdef PBL_COLOR
 	hand_color = getHandColor(getHand_color());
-	if(gcolor_equal(hand_color,fg_color))
-		hand_color = fg_color;
-#else
-	hand_color = fg_color;
 #endif
+	hand_outline_color = GColorClear;
+	if(gcolor_equal(bg_color,hand_color) || gcolor_equal(bg_circle_color,hand_color))
+		hand_outline_color = gcolor_equal(hand_color,GColorWhite) ? GColorBlack : GColorWhite;
 
-	replace_gbitmap_color(GColorBlack, fg_color, bt_disconnected);
+	replace_gbitmap_color(GColorBlack, text_and_dots_color, bt_disconnected);
 
 	window_set_background_color(window, bg_color);
 }

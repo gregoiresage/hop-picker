@@ -50,7 +50,9 @@
         "type": "enum",
         "choices": {
           "DARK": "Dark",
-          "CLEAR": "Clear"
+          "CLEAR": "Clear",
+          "WHITE_ON_BLACK": "White on Black",
+          "BLACK_ON_WHITE": "Black on White"
         },
         "default": 0
       },
