@@ -173,10 +173,15 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 	if(!gcolor_equal(hand_outline_color,GColorClear)){
 		graphics_draw_circle(ctx, GPoint(segA.x, segA.y), DATE_INNER_RADIUS);
 	}
+	GRect text_bounds = (GRect){.origin=segA,.size={25,25}};
+	GSize text_size = graphics_text_layout_get_content_size(date_text,small_font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
+	text_bounds.origin.x -= text_size.w/2;
+	text_bounds.origin.y -= text_size.h/2+1;
+	text_bounds.size = text_size;
 	graphics_draw_text(ctx,
 					date_text,
 					small_font,
-					GRect(segA.x-11, segA.y-11, 25, 25),
+					text_bounds,
 					GTextOverflowModeWordWrap,
 					GTextAlignmentCenter,
 					NULL);
