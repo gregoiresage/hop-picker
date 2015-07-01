@@ -91,7 +91,7 @@
       },
       {
         "name": "date",
-        "title": "Display the date",
+        "title": "Show the date",
         "type": "boolean",
         "off-text": "OFF",
         "on-text": "ON",
