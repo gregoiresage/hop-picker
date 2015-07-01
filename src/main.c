@@ -11,7 +11,7 @@ static GFont custom_font;
 static GFont small_font;
 
 static GPath *hour_arrow;
-static const GPathInfo LINE_HAND_POINTS =  {4,(GPoint []) {{-4, 0},{-4, -300},{4, -300},{4, 0}}};
+static const GPathInfo LINE_HAND_POINTS =  {4,(GPoint []) {{-3, 0},{-3, -300},{3, -300},{3, 0}}};
 static const GPathInfo ARROW_HAND_POINTS = {4,(GPoint []) {{-9, 0},{-2, -175},{2, -175},{9, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
@@ -43,8 +43,9 @@ static int layer_update_count = 0;
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
 
+
 #define DATE_OUTER_RADIUS 17
-#define DATE_INNER_RADIUS 13
+#define DATE_INNER_RADIUS 14
 
 #define SMALL_DOT_RADIUS 3
 #define BIG_DOT_RADIUS 6
