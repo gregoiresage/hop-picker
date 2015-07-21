@@ -39,6 +39,12 @@
         "type": "png",
         "name": "IMAGE_BT_DISCONNECTED",
         "file": "images/bluetooth_not_connected.png"
+      },
+      {
+        "menuIcon": true,
+        "type": "png",
+        "name": "IMAGE_MENU_ICON",
+        "file": "images/menu_icon.png"
       }
     ]
   },
