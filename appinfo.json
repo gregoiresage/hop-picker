@@ -8,7 +8,8 @@
     "display_bt_icon": 5,
     "animated": 6,
     "hand_color": 7,
-    "color_theme": 8
+    "color_theme": 8,
+    "full_hour_mode": 9
   },
   "longName": "HopPicker",
   "versionCode": 17,
@@ -57,6 +58,15 @@
         "default": 0
       },
       {
+        "name": "full_hour_mode",
+        "title": "Display mode",
+        "type": "boolean",
+        "description": "12 hours around the edge or all 24 hours",
+        "off-text": "12 hours",
+        "on-text": "24 hours",
+        "default": false
+      },
+      {
         "name": "hand_color",
         "title": "Watch hand color",
         "type": "enum",
@@ -77,6 +87,7 @@
         "type": "enum",
         "choices": {
           "LINE": "Line",
+          "BIGLINE": "Big Line",
           "ARROW": "Arrow"
         },
         "default": 0

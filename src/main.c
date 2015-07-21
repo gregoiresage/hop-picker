@@ -12,7 +12,12 @@ static GFont small_font;
 
 static GPath *hour_arrow;
 static const GPathInfo LINE_HAND_POINTS =  {4,(GPoint []) {{-3, 0},{-3, -300},{3, -300},{3, 0}}};
+static const GPathInfo BIG_LINE_HAND_POINTS =  {4,(GPoint []) {{-5, 0},{-5, -300},{5, -300},{5, 0}}};
 static const GPathInfo ARROW_HAND_POINTS = {4,(GPoint []) {{-9, 0},{-2, -175},{2, -175},{9, 0}}};
+
+static const GPathInfo LINE_HAND_24_POINTS =  {4,(GPoint []) {{-3, 0},{-3, -300-150},{3, -300-150},{3, 0}}};
+static const GPathInfo BIG_LINE_HAND_24_POINTS =  {4,(GPoint []) {{-5, 0},{-5, -300-150},{5, -300-150},{5, 0}}};
+static const GPathInfo ARROW_HAND_24_POINTS = {4,(GPoint []) {{-9*2, 0},{-2, -175-150},{2, -175-150},{9*2, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
 static char date_text[3] = "31";
@@ -89,6 +94,9 @@ static void animation_stopped(Animation *animation, bool finished, void *data) {
 static void drawClock(GPoint center, GContext *ctx){
 	GPoint segA;
 	GPoint segC;
+
+	uint16_t segA_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	uint16_t segC_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 	graphics_fill_circle(ctx, center, SECOND_HAND_LENGTH_C);
@@ -97,21 +105,30 @@ static void drawClock(GPoint center, GContext *ctx){
 	graphics_context_set_fill_color(ctx, text_and_dots_color);
 	graphics_context_set_stroke_color(ctx, dots_outline_color);
  
-	int minhour=(hours+24)-2;
-	int maxhour=hours+24+3;
+	int minhour = hours + 24 - 2;
+	int maxhour = hours + 24 + 3;
 	
 	for(int i=minhour*4; i<maxhour*4; i++){
-		int32_t angle = TRIG_MAX_ANGLE * (i % (12*4)) / (12*4);
+		int32_t angle = 
+			getFull_hour_mode() ?
+				TRIG_MAX_ANGLE * (i % (24*4)) / (24*4):
+				TRIG_MAX_ANGLE * (i % (12*4)) / (12*4);
+				;
+		if(getFull_hour_mode()){
+			angle += TRIG_MAX_ANGLE / 2;
+			angle = angle % TRIG_MAX_ANGLE;
+		}
+
 		if(isAnimating){
-			segC.y = (int16_t)((-cos_lookup(angle) * SECOND_HAND_LENGTH_C / TRIG_MAX_RATIO) + center.y - 84) * percent / 100 + 84;
-			segC.x = (int16_t)((sin_lookup(angle) * SECOND_HAND_LENGTH_C / TRIG_MAX_RATIO) + center.x - 72) * percent / 100 + 72;
+			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - 84) * percent / 100 + 84;
+			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - 72) * percent / 100 + 72;
 			segA.x = segA.y = 0;
 		}
 		else {
-			segA.y = (int16_t)(-cos_lookup(angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.y;
-			segA.x = (int16_t)(sin_lookup(angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.x;
-			segC.y = (int16_t)(-cos_lookup(angle) * SECOND_HAND_LENGTH_C / TRIG_MAX_RATIO) + center.y;
-			segC.x = (int16_t)(sin_lookup(angle) * SECOND_HAND_LENGTH_C / TRIG_MAX_RATIO) + center.x;
+			segA.y = (int16_t)(-cos_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.y;
+			segA.x = (int16_t)(sin_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.x;
+			segC.y = (int16_t)(-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y;
+			segC.x = (int16_t)(sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x;
 		}
 		
 		uint8_t radius = i % 4  ? SMALL_DOT_RADIUS : BIG_DOT_RADIUS;
@@ -148,7 +165,7 @@ static void drawClock(GPoint center, GContext *ctx){
 static void drawDate(GPoint center, int angle, GContext *ctx){
 	GPoint segA;
 
-	int32_t posFromCenter = DATE_POSITION_FROM_CENTER;
+	int32_t posFromCenter = getFull_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
 
 	do{
 		segA.y = (int16_t)(-cos_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.y;
@@ -188,11 +205,11 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 					NULL);
 }
 
-static void drawHand(GPoint secondHand, int angle, GContext *ctx){
+static void drawHand(GPoint center, int angle, GContext *ctx){
 	
 	graphics_context_set_fill_color(ctx, hand_color);
 	
-	gpath_move_to(hour_arrow, secondHand);
+	gpath_move_to(hour_arrow, center);
 	gpath_rotate_to(hour_arrow, angle);
 	gpath_draw_filled(ctx, hour_arrow);
 
@@ -224,16 +241,26 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 		layer_update_count++;
 	}
 	
-	int32_t second_angle = TRIG_MAX_ANGLE * ((hours % 12) * 60 + minutes) / (12 * 60);
+	int32_t angle = 
+		getFull_hour_mode() ?
+			TRIG_MAX_ANGLE * ((hours % 24) * 60 + minutes) / (24 * 60):
+			TRIG_MAX_ANGLE * ((hours % 12) * 60 + minutes) / (12 * 60);
+			
+	if(getFull_hour_mode()){
+		angle += TRIG_MAX_ANGLE / 2;
+		angle = angle % TRIG_MAX_ANGLE;
+	}
 
-	GPoint secondHand;
-	secondHand.y = (int16_t)(cos_lookup(second_angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.y;
-	secondHand.x = (int16_t)(-sin_lookup(second_angle) * SECOND_HAND_LENGTH_A / TRIG_MAX_RATIO) + center.x;
+	uint16_t segA_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
 
-	drawClock(secondHand, ctx);
+	GPoint centerClock;
+	centerClock.y = (int16_t)(cos_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.y;
+	centerClock.x = (int16_t)(-sin_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.x;
+
+	drawClock(centerClock, ctx);
 
 	if(!isAnimating){
-		drawHand(secondHand, second_angle, ctx);
+		drawHand(centerClock, angle, ctx);
 
 		if(getDisplay_bt_icon() && !btConnected){
 #ifdef PBL_COLOR
@@ -242,18 +269,32 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
   			if(gcolor_equal(GColorBlack,bg_color))
   				graphics_context_set_compositing_mode(ctx,GCompOpAssignInverted);
 #endif
-			if(hours % 12 < 3)
-				graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,0,32,32));
-			else if(hours % 12 < 6)
-				graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,160-32,32,32));
-			else if(hours % 12 < 9)
-				graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
-			else 
-				graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
+
+  			if(getFull_hour_mode()){
+				if(hours < 6)
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
+				else if(hours < 12)
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
+				else if(hours < 18)
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,0,32,32));
+				else 
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,160-32,32,32));
+			}
+  			else {
+				if(hours % 12 < 3)
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,0,32,32));
+				else if(hours % 12 < 6)
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,160-32,32,32));
+				else if(hours % 12 < 9)
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
+				else 
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
+  			}
+
 		}
 		
 		if(getDate()){
-			drawDate(secondHand, second_angle, ctx);
+			drawDate(centerClock, angle, ctx);
 		}
 	}	
 }
@@ -289,9 +330,10 @@ static GColor getHandColor(int color){
 static void updateSettings(){
 	gpath_destroy(hour_arrow);
 	switch(getHand()){
-		case HAND_LINE : hour_arrow = gpath_create(&LINE_HAND_POINTS); break;
+		case HAND_LINE : hour_arrow = gpath_create(getFull_hour_mode() ? &LINE_HAND_24_POINTS : &LINE_HAND_POINTS); break;
+		case HAND_BIGLINE : hour_arrow = gpath_create(getFull_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
 		case HAND_ARROW : 
-		default : hour_arrow = gpath_create(&ARROW_HAND_POINTS); break;
+		default : hour_arrow = gpath_create(getFull_hour_mode() ? &ARROW_HAND_24_POINTS : &ARROW_HAND_POINTS); break;
 	}
 
 	switch(getColor_theme()){
