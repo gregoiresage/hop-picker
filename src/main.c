@@ -312,21 +312,6 @@ static void window_unload(Window *window) {
 	layer_destroy(layer);
 }
 
-#ifdef PBL_COLOR
-static GColor getHandColor(int color){
-	switch(color){
-		case HAND_COLOR_WHITE	: return GColorWhite;
-		case HAND_COLOR_BLACK	: return GColorBlack;
-		case HAND_COLOR_RED 	: return GColorRed;
-		case HAND_COLOR_BLUE 	: return GColorVividCerulean;
-		case HAND_COLOR_ORANGE 	: return GColorOrange;
-		case HAND_COLOR_MAGENTA	: return GColorMagenta;
-		case HAND_COLOR_GREEN	: return GColorMalachite;
-		default				: return GColorWhite;
-	}
-}
-#endif
-
 static void updateSettings(){
 	gpath_destroy(hour_arrow);
 	switch(getHand()){
@@ -368,7 +353,7 @@ static void updateSettings(){
 	}
 
 #ifdef PBL_COLOR
-	hand_color = getHandColor(getHand_color());
+	hand_color = getHand_color();
 #endif
 	hand_outline_color = GColorClear;
 	if(gcolor_equal(bg_color,hand_color) || gcolor_equal(bg_circle_color,hand_color))

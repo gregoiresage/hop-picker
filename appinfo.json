@@ -49,86 +49,94 @@
     ]
   },
   "preferences": {
-    "embedded": true,
-    "items": [
+    "description": "<center><b>HopPicker</b></center>",
+    "sections": [
       {
-        "name": "color_theme",
-        "title": "Color Style",
-        "type": "enum",
-        "choices": {
-          "DARK": "Dark",
-          "CLEAR": "Clear",
-          "WHITE_ON_BLACK": "White on Black",
-          "BLACK_ON_WHITE": "Black on White"
-        },
-        "default": 0
+        "name": "Style",
+        "items": [
+          {
+            "name": "color_theme",
+            "title": "Color Style",
+            "type": "enum",
+            "choices": {
+              "DARK": "Dark",
+              "CLEAR": "Clear",
+              "WHITE_ON_BLACK": "White on Black",
+              "BLACK_ON_WHITE": "Black on White"
+            },
+            "default": 0
+          },
+          {
+            "name": "full_hour_mode",
+            "title": "Display mode",
+            "type": "boolean",
+            "description": "12 hours around the edge or all 24 hours",
+            "off-text": "12 hours",
+            "on-text": "24 hours",
+            "default": false
+          },
+          {
+            "name": "hand_color",
+            "title": "Watch hand color",
+            "type": "color",
+            "default": "0xFF0000"
+          },
+          {
+            "name": "hand",
+            "title": "Watch hand style",
+            "type": "enum",
+            "choices": {
+              "LINE": "Line",
+              "BIGLINE": "Big Line",
+              "ARROW": "Arrow"
+            },
+            "default": 0
+          },
+          {
+            "name": "animated",
+            "title": "Startup animation",
+            "type": "boolean",
+            "off-text": "OFF",
+            "on-text": "ON",
+            "default": true
+          }
+        ]
       },
       {
-        "name": "full_hour_mode",
-        "title": "Display mode",
-        "type": "boolean",
-        "description": "12 hours around the edge or all 24 hours",
-        "off-text": "12 hours",
-        "on-text": "24 hours",
-        "default": false
+        "name": "Date",
+        "items": [
+          {
+            "name": "date",
+            "title": "Show the date",
+            "type": "boolean",
+            "off-text": "OFF",
+            "on-text": "ON",
+            "default": true
+          }
+        ]
       },
       {
-        "name": "hand_color",
-        "title": "Watch hand color",
-        "type": "enum",
-        "choices": {
-          "WHITE": "White",
-          "BLACK": "Black",
-          "RED": "Red",
-          "BLUE": "Blue",
-          "ORANGE": "Orange",
-          "MAGENTA": "Magenta",
-          "GREEN": "Green"
-        },
-        "default": 2
-      },
-      {
-        "name": "hand",
-        "title": "Watch hand style",
-        "type": "enum",
-        "choices": {
-          "LINE": "Line",
-          "BIGLINE": "Big Line",
-          "ARROW": "Arrow"
-        },
-        "default": 0
-      },
-      {
-        "name": "animated",
-        "title": "Startup animation",
-        "type": "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": true
-      },
-      {
-        "name": "date",
-        "title": "Show the date",
-        "type": "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": true
-      },
-      {
-        "name": "vibrate_on_bt_lost",
-        "title": "Vibrate on Bluetooth disconnection",
-        "type": "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": false
-      },
-      {
-        "name": "display_bt_icon",
-        "title": "Display icon on Bluetooth disconnection",
-        "type": "boolean",
-        "off-text": "OFF",
-        "on-text": "ON",
-        "default": true
+        "name": "Bluetooth",
+        "items": [
+          {
+            "name": "vibrate_on_bt_lost",
+            "title": "Vibrate",
+            "description": "Vibrate on disconnection ",
+            "type": "boolean",
+            "off-text": "OFF",
+            "on-text": "ON",
+            "default": false
+          },
+          {
+            "name": "display_bt_icon",
+            "title": "Display icon",
+            "description": "Display an icon on disconnection",
+            "type": "boolean",
+            "off-text": "OFF",
+            "on-text": "ON",
+            "default": true
+          }
+        ]
       }
     ]
   },
