@@ -1,5 +1,5 @@
 {
-  "versionLabel": "2.6",
+  "versionLabel": "2.7",
   "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
   "appKeys": {
     "date": 2,
@@ -13,7 +13,7 @@
     "mark_style": 10
   },
   "longName": "HopPicker",
-  "versionCode": 19,
+  "versionCode": 20,
   "capabilities": [
     "configurable"
   ],
