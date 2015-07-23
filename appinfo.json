@@ -121,7 +121,7 @@
           {
             "name": "vibrate_on_bt_lost",
             "title": "Vibrate",
-            "description": "Vibrate on disconnection ",
+            "description": "Vibrate on disconnection",
             "type": "boolean",
             "off-text": "OFF",
             "on-text": "ON",
