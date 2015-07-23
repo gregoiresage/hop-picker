@@ -99,7 +99,7 @@ static void drawClock(GPoint center, GContext *ctx){
 	uint16_t segC_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
-	graphics_fill_circle(ctx, center, SECOND_HAND_LENGTH_C);
+	graphics_fill_circle(ctx, center, segC_length);
 
 	graphics_context_set_text_color(ctx, text_and_dots_color);
 	graphics_context_set_fill_color(ctx, text_and_dots_color);
