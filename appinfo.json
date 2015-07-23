@@ -9,7 +9,8 @@
     "animated": 6,
     "hand_color": 7,
     "color_theme": 8,
-    "full_hour_mode": 9
+    "full_hour_mode": 9,
+    "mark_style": 10
   },
   "longName": "HopPicker",
   "versionCode": 19,
@@ -49,7 +50,6 @@
     ]
   },
   "preferences": {
-    "description": "<center><b>HopPicker</b></center>",
     "sections": [
       {
         "name": "Style",
@@ -89,6 +89,16 @@
               "LINE": "Line",
               "BIGLINE": "Big Line",
               "ARROW": "Arrow"
+            },
+            "default": 0
+          },
+          {
+            "name": "mark_style",
+            "title": "Mark style",
+            "type": "enum",
+            "choices": {
+              "DOTS": "Dots",
+              "LINE": "Lines"
             },
             "default": 0
           },

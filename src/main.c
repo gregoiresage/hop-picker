@@ -54,6 +54,11 @@ static int layer_update_count = 0;
 
 #define SMALL_DOT_RADIUS 3
 #define BIG_DOT_RADIUS 6
+static const GPathInfo SMALL_LINE_MARK_POINTS =  {4,(GPoint []) {{-3, 2},{-3, -6},{3, -6},{3, 2}}};
+static const GPathInfo BIG_LINE_MARK_POINTS   =  {4,(GPoint []) {{-3, 4},{-3, -8},{3, -8},{3, 4}}};
+
+static GPath *small_line_mark_path;
+static GPath *big_line_mark_path;
 
 static bool containsCircle(GPoint center, int radius){
 	return center.x - radius > 0 && center.x + radius < 144 && center.y - radius > 0 && center.y + radius < 168;
@@ -131,32 +136,41 @@ static void drawClock(GPoint center, GContext *ctx){
 			segC.x = (int16_t)(sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x;
 		}
 		
-		uint8_t radius = i % 4  ? SMALL_DOT_RADIUS : BIG_DOT_RADIUS;
+		bool hour_mark = (i % 4) == 0;
+		uint8_t radius = hour_mark ? BIG_DOT_RADIUS : SMALL_DOT_RADIUS ;
 
-		// if((radius == BIG_DOT_RADIUS) || containsCircle(segC, radius))
-		{
+		if(getMark_style() == MARK_STYLE_DOTS) {
 			graphics_fill_circle(ctx, segC, radius);
 			graphics_draw_circle(ctx, segC, radius);
-
-			if(!isAnimating && (i % 4 == 0)) {			
-				if(clock_is_24h_style()){
-					graphics_draw_text(ctx,
-						txt[(i % (24*4))/4],
-						custom_font,
-						GRect(segA.x-25, segA.y-25, 50, 50),
-						GTextOverflowModeWordWrap,
-						GTextAlignmentCenter,
-						NULL);	
-				}
-				else {
-					graphics_draw_text(ctx,
-						(i % (12*4))/4 == 0 ? "12" : txt[(i % (12*4))/4],
-						custom_font,
-						GRect(segA.x-25, segA.y-25, 50, 50),
-						GTextOverflowModeWordWrap,
-						GTextAlignmentCenter,
-						NULL);
-				}
+		}
+		else {
+			GPath* mark_path = hour_mark ? big_line_mark_path : small_line_mark_path;
+			gpath_move_to(mark_path, segC);
+			gpath_rotate_to(mark_path, angle);
+			gpath_draw_filled(ctx, mark_path);
+			// don't draw the outline for 'monochrome' themes
+			if(getColor_theme() == COLOR_THEME_BLACK_ON_WHITE || getColor_theme() == COLOR_THEME_WHITE_ON_BLACK)
+				gpath_draw_outline(ctx, mark_path);
+		}
+		
+		if(!isAnimating && hour_mark) {			
+			if(clock_is_24h_style() || getFull_hour_mode()){
+				graphics_draw_text(ctx,
+					txt[(i % (24*4))/4],
+					custom_font,
+					GRect(segA.x-25, segA.y-25, 50, 50),
+					GTextOverflowModeWordWrap,
+					GTextAlignmentCenter,
+					NULL);	
+			}
+			else {
+				graphics_draw_text(ctx,
+					(i % (12*4))/4 == 0 ? "12" : txt[(i % (12*4))/4],
+					custom_font,
+					GRect(segA.x-25, segA.y-25, 50, 50),
+					GTextOverflowModeWordWrap,
+					GTextAlignmentCenter,
+					NULL);
 			}
 		}
 	}
@@ -400,6 +414,9 @@ static void init(void) {
 	small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_18));
 	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
 
+	small_line_mark_path = gpath_create(&SMALL_LINE_MARK_POINTS);
+	big_line_mark_path = gpath_create(&BIG_LINE_MARK_POINTS);
+
 	app_message_register_inbox_received(in_received_handler);
 
 	btConnected = bluetooth_connection_service_peek();
@@ -426,6 +443,8 @@ static void deinit(void) {
 	fonts_unload_custom_font(small_font);
 	gbitmap_destroy(bt_disconnected);
 	gpath_destroy(hour_arrow);
+	gpath_destroy(small_line_mark_path);
+	gpath_destroy(big_line_mark_path);
 	window_destroy(window);
 	bluetooth_connection_service_unsubscribe();
 }
