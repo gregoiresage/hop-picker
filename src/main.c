@@ -60,8 +60,16 @@ static const GPathInfo BIG_LINE_MARK_POINTS   =  {4,(GPoint []) {{-3, 4},{-3, -8
 static GPath *small_line_mark_path;
 static GPath *big_line_mark_path;
 
+#ifdef PBL_ROUND
+#define SCREEN_WIDTH 180
+#define SCREEN_HEIGHT 180
+#else
+#define SCREEN_WIDTH 144
+#define SCREEN_HEIGHT 168
+#endif
+
 static bool containsCircle(GPoint center, int radius){
-	return center.x - radius > 0 && center.x + radius < 144 && center.y - radius > 0 && center.y + radius < 168;
+	return center.x - radius > 0 && center.x + radius < SCREEN_WIDTH && center.y - radius > 0 && center.y + radius < SCREEN_HEIGHT;
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -72,7 +80,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 		layer_mark_dirty(layer);
 }
 
-#ifdef PBL_COLOR
+#ifdef PBL_SDK_3
 static void animationUpdate(Animation *animation, const AnimationProgress progress) {
 #else
 static void animationUpdate(Animation *animation, const uint32_t progress) {
@@ -125,8 +133,8 @@ static void drawClock(GPoint center, GContext *ctx){
 		}
 
 		if(isAnimating){
-			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - 84) * percent / 100 + 84;
-			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - 72) * percent / 100 + 72;
+			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - SCREEN_HEIGHT/2) * percent / 100 + SCREEN_HEIGHT/2;
+			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - SCREEN_WIDTH/2) * percent / 100 + SCREEN_WIDTH/2;
 			segA.x = segA.y = 0;
 		}
 		else {
@@ -179,6 +187,14 @@ static void drawClock(GPoint center, GContext *ctx){
 static void drawDate(GPoint center, int angle, GContext *ctx){
 	GPoint segA;
 
+#ifdef PBL_ROUND
+	uint8_t pos = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	pos -= 87;
+	pos += DATE_OUTER_RADIUS;
+	segA.y = (int16_t)(-cos_lookup(angle) * pos / TRIG_MAX_RATIO) + center.y;
+	segA.x = (int16_t)(sin_lookup(angle) * pos / TRIG_MAX_RATIO) + center.x;
+#else
+
 	int32_t posFromCenter = getFull_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
 
 	do{
@@ -188,22 +204,24 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 	}
 	while(containsCircle(segA, DATE_OUTER_RADIUS + 1));
 
+#endif
+
 	snprintf(date_text, sizeof(date_text), "%d", day); 
 
 	graphics_context_set_text_color(ctx, text_and_dots_color);
 	graphics_context_set_stroke_color(ctx, hand_outline_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
-	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), DATE_OUTER_RADIUS);
+	graphics_fill_circle(ctx, segA, DATE_OUTER_RADIUS);
 	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, GPoint(segA.x, segA.y), DATE_OUTER_RADIUS);
+		graphics_draw_circle(ctx, segA, DATE_OUTER_RADIUS);
 	}
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 
-	graphics_fill_circle(ctx, GPoint(segA.x, segA.y), DATE_INNER_RADIUS);
+	graphics_fill_circle(ctx, segA, DATE_INNER_RADIUS);
 	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, GPoint(segA.x, segA.y), DATE_INNER_RADIUS);
+		graphics_draw_circle(ctx, segA, DATE_INNER_RADIUS);
 	}
 	GRect text_bounds = (GRect){.origin=segA,.size={25,25}};
 	GSize text_size = graphics_text_layout_get_content_size(date_text,small_font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
@@ -290,15 +308,15 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 				else if(hours < 12)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
 				else if(hours < 18)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,0,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,0,32,32));
 				else 
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,160-32,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,160-32,32,32));
 			}
   			else {
 				if(hours % 12 < 3)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,0,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,0,32,32));
 				else if(hours % 12 < 6)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(144-32,160-32,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,160-32,32,32));
 				else if(hours % 12 < 9)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
 				else 

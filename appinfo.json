@@ -68,7 +68,7 @@
           },
           {
             "name": "full_hour_mode",
-            "title": "Display mode",
+            "title": "24 hours mode",
             "type": "boolean",
             "description": "12 hours around the edge or all 24 hours",
             "off-text": "12 hours",
@@ -151,7 +151,7 @@
     ]
   },
   "targetPlatforms": [
-    "basalt","aplite"
+    "basalt","aplite","chalk"
   ],
   "sdkVersion": "3"
 }
