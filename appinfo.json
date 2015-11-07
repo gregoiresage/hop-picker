@@ -151,7 +151,6 @@
           {
             "name": "vibrate_on_bt_lost",
             "title": "Vibrate",
-            "description": "Vibrate on disconnection",
             "type": "boolean",
             "off-text": "OFF",
             "on-text": "ON",
@@ -160,7 +159,6 @@
           {
             "name": "display_bt_icon",
             "title": "Display icon",
-            "description": "Display an icon on disconnection",
             "type": "boolean",
             "off-text": "OFF",
             "on-text": "ON",
