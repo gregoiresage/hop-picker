@@ -2,7 +2,6 @@
   "versionLabel": "3.0",
   "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
   "appKeys": {
-    "date": 2,
     "hand": 3,
     "vibrate_on_bt_lost": 4,
     "display_bt_icon": 5,
@@ -10,7 +9,9 @@
     "hand_color": 7,
     "color_theme": 8,
     "full_hour_mode": 9,
-    "mark_style": 10
+    "mark_style": 10,
+    "info_display": 11,
+    "info_text_size": 12
   },
   "longName": "HopPicker",
   "versionCode": 20,
@@ -34,6 +35,12 @@
         "characterRegex": "[0-9]",
         "type": "font",
         "name": "COMFORTAA_18",
+        "file": "fonts/Comfortaa-Bold.ttf"
+      },
+      {
+        "characterRegex": "[0-9]",
+        "type": "font",
+        "name": "COMFORTAA_26",
         "file": "fonts/Comfortaa-Bold.ttf"
       },
       {
@@ -113,15 +120,28 @@
         ]
       },
       {
-        "name": "Date",
+        "name": "Other",
         "items": [
           {
-            "name": "date",
-            "title": "Show the date",
-            "type": "boolean",
-            "off-text": "OFF",
-            "on-text": "ON",
-            "default": true
+            "name": "info_display",
+            "title": "Display",
+            "type": "enum",
+            "choices": {
+              "NO": "Nothing",
+              "DATE": "Date",
+              "MINUTE": "Minutes"
+            },
+            "default": 1
+          },
+          {
+            "name": "info_text_size",
+            "title": "Text Size",
+            "type": "enum",
+            "choices": {
+              "DEFAULT": "Default",
+              "LARGER": "Larger"
+            },
+            "default": 0
           }
         ]
       },

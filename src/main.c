@@ -9,6 +9,7 @@ static GBitmap *bt_disconnected = NULL;
 
 static GFont custom_font;
 static GFont small_font;
+static GFont medium_font;
 
 static GPath *hour_arrow;
 static const GPathInfo LINE_HAND_POINTS =  {4,(GPoint []) {{-3, 0},{-3, -300},{3, -300},{3, 0}}};
@@ -20,7 +21,7 @@ static const GPathInfo BIG_LINE_HAND_24_POINTS =  {4,(GPoint []) {{-5, 0},{-5, -
 static const GPathInfo ARROW_HAND_24_POINTS = {4,(GPoint []) {{-9*2, 0},{-2, -175-150},{2, -175-150},{9*2, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
-static char date_text[3] = "31";
+static char info_text[5] = "0000";
 
 static Animation* animation;
 static AnimationImplementation animImpl;
@@ -47,10 +48,6 @@ static int layer_update_count = 0;
 #define DATE_POSITION_FROM_CENTER 100
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
-
-
-#define DATE_OUTER_RADIUS 17
-#define DATE_INNER_RADIUS 14
 
 #define SMALL_DOT_RADIUS 3
 #define BIG_DOT_RADIUS 6
@@ -184,13 +181,33 @@ static void drawClock(GPoint center, GContext *ctx){
 	}
 }
 
-static void drawDate(GPoint center, int angle, GContext *ctx){
+static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 	GPoint segA;
+
+	uint16_t outer_radius = 0;
+	uint16_t inner_radius = 0;
+	uint16_t font_height = 0;
+	GFont font = small_font;
+
+	switch(getInfo_text_size()){
+		case INFO_TEXT_SIZE_DEFAULT : 
+			outer_radius = 17;
+			inner_radius = 14;
+			font = small_font;
+			font_height = 14;
+			break;
+		case INFO_TEXT_SIZE_LARGER : 
+			outer_radius = 23;
+			inner_radius = 20;
+			font = medium_font;
+			font_height = 20;
+			break;
+	}
 
 #ifdef PBL_ROUND
 	uint8_t pos = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
 	pos -= 87;
-	pos += DATE_OUTER_RADIUS;
+	pos += outer_radius;
 	segA.y = (int16_t)(-cos_lookup(angle) * pos / TRIG_MAX_RATIO) + center.y;
 	segA.x = (int16_t)(sin_lookup(angle) * pos / TRIG_MAX_RATIO) + center.x;
 #else
@@ -202,35 +219,33 @@ static void drawDate(GPoint center, int angle, GContext *ctx){
 		segA.x = (int16_t)(sin_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.x;
 		posFromCenter--;
 	}
-	while(containsCircle(segA, DATE_OUTER_RADIUS + 1));
+	while(containsCircle(segA, outer_radius + 1));
 
 #endif
-
-	snprintf(date_text, sizeof(date_text), "%d", day); 
 
 	graphics_context_set_text_color(ctx, text_and_dots_color);
 	graphics_context_set_stroke_color(ctx, hand_outline_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
-	graphics_fill_circle(ctx, segA, DATE_OUTER_RADIUS);
+	graphics_fill_circle(ctx, segA, outer_radius);
 	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, segA, DATE_OUTER_RADIUS);
+		graphics_draw_circle(ctx, segA, outer_radius);
 	}
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 
-	graphics_fill_circle(ctx, segA, DATE_INNER_RADIUS);
+	graphics_fill_circle(ctx, segA, inner_radius);
 	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, segA, DATE_INNER_RADIUS);
+		graphics_draw_circle(ctx, segA, inner_radius);
 	}
-	GRect text_bounds = (GRect){.origin=segA,.size={25,25}};
-	GSize text_size = graphics_text_layout_get_content_size(date_text,small_font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
+	GRect text_bounds = (GRect){.origin=segA,.size={60,60}};
+	GSize text_size = graphics_text_layout_get_content_size(text,font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
 	text_bounds.origin.x -= text_size.w/2;
-	text_bounds.origin.y -= text_size.h/2+1;
+	text_bounds.origin.y -= font_height/2 + (text_size.h - font_height) - 1;
 	text_bounds.size = text_size;
 	graphics_draw_text(ctx,
-					date_text,
-					small_font,
+					text,
+					font,
 					text_bounds,
 					GTextOverflowModeWordWrap,
 					GTextAlignmentCenter,
@@ -325,8 +340,13 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 
 		}
 		
-		if(getDate()){
-			drawDate(centerClock, angle, ctx);
+		if(getInfo_display() == INFO_DISPLAY_DATE){
+			snprintf(info_text, sizeof(info_text), "%d", day); 
+			drawInfo(centerClock, angle, ctx, info_text);
+		}
+		else if(getInfo_display() == INFO_DISPLAY_MINUTE){
+			snprintf(info_text, sizeof(info_text), "%d", minutes); 
+			drawInfo(centerClock, angle, ctx, info_text);
 		}
 	}	
 }
@@ -430,6 +450,7 @@ static void init(void) {
 
 	custom_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_40));
 	small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_18));
+	medium_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COMFORTAA_26));
 	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
 
 	small_line_mark_path = gpath_create(&SMALL_LINE_MARK_POINTS);
@@ -459,6 +480,7 @@ static void deinit(void) {
 	autoconfig_deinit();
 	fonts_unload_custom_font(custom_font);
 	fonts_unload_custom_font(small_font);
+	fonts_unload_custom_font(medium_font);
 	gbitmap_destroy(bt_disconnected);
 	gpath_destroy(hour_arrow);
 	gpath_destroy(small_line_mark_path);
