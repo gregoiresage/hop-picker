@@ -57,6 +57,7 @@
     ]
   },
   "preferences": {
+    "footer":"<div class=\"button-container\"><a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BBN7W2C9Z9HP8\"><input type=\"button\" class=\"item-button\" value=\"DONATE\" /></a></div></div><div class=\"item-container-footer\">If you like my work, please give a heart and share. Also feel free to make a small donation by clicking on the above button. Every gift is greatly appreciated !</div>",
     "sections": [
       {
         "name": "Style",
