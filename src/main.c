@@ -440,7 +440,7 @@ static void bluetooth_connection_handler(bool connected){
 }
 
 static void init(void) {
-	autoconfig_init();
+	autoconfig_init(200,0);
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
