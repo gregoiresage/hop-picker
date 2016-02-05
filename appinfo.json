@@ -87,7 +87,7 @@
             "name": "hand_color",
             "title": "Watch hand color",
             "type": "color",
-            "default": "0xFF0000"
+            "default": "GColorRed"
           },
           {
             "name": "hand",
