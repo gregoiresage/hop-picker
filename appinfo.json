@@ -11,7 +11,8 @@
     "full_hour_mode": 9,
     "mark_style": 10,
     "info_display": 11,
-    "info_text_size": 12
+    "info_text_size": 12,
+    "mark_space": 13
   },
   "longName": "HopPicker",
   "versionCode": 24,
@@ -109,6 +110,19 @@
               "LINE": "Lines"
             },
             "default": 0
+          },
+          {
+            "name": "mark_space",
+            "title": "Mark space",
+            "description": "Display a mark every X minutes",
+            "type": "enum",
+            "choices": {
+              "10": "10",
+              "15": "15",
+              "30": "30",
+              "60": "60"
+            },
+            "default": 1
           },
           {
             "name": "animated",

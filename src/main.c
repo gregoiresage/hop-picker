@@ -52,7 +52,7 @@ static int layer_update_count = 0;
 #define SMALL_DOT_RADIUS 3
 #define BIG_DOT_RADIUS 6
 static const GPathInfo SMALL_LINE_MARK_POINTS =  {4,(GPoint []) {{-3, 2},{-3, -6},{3, -6},{3, 2}}};
-static const GPathInfo BIG_LINE_MARK_POINTS   =  {4,(GPoint []) {{-3, 4},{-3, -8},{3, -8},{3, 4}}};
+static const GPathInfo BIG_LINE_MARK_POINTS   =  {4,(GPoint []) {{-3, 4},{-3, -10},{3, -10},{3, 4}}};
 
 static GPath *small_line_mark_path;
 static GPath *big_line_mark_path;
@@ -117,12 +117,20 @@ static void drawClock(GPoint center, GContext *ctx){
  
 	int minhour = hours + 24 - 2;
 	int maxhour = hours + 24 + 3;
+
+	int mark_space = 1;
+	switch(getMark_space()){
+		case MARK_SPACE_10 : mark_space = 6; break;
+		case MARK_SPACE_15 : mark_space = 4; break;
+		case MARK_SPACE_30 : mark_space = 2; break;
+		case MARK_SPACE_60 : mark_space = 1; break;
+	}
 	
-	for(int i=minhour*4; i<maxhour*4; i++){
+	for(int i=minhour*mark_space; i<maxhour*mark_space; i++){
 		int32_t angle = 
 			getFull_hour_mode() ?
-				TRIG_MAX_ANGLE * (i % (24*4)) / (24*4):
-				TRIG_MAX_ANGLE * (i % (12*4)) / (12*4);
+				TRIG_MAX_ANGLE * (i % (24*mark_space)) / (24*mark_space):
+				TRIG_MAX_ANGLE * (i % (12*mark_space)) / (12*mark_space);
 				;
 		if(getFull_hour_mode()){
 			angle += TRIG_MAX_ANGLE / 2;
@@ -141,7 +149,7 @@ static void drawClock(GPoint center, GContext *ctx){
 			segC.x = (int16_t)(sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x;
 		}
 		
-		bool hour_mark = (i % 4) == 0;
+		bool hour_mark = (i % mark_space) == 0;
 		uint8_t radius = hour_mark ? BIG_DOT_RADIUS : SMALL_DOT_RADIUS ;
 
 		if(getMark_style() == MARK_STYLE_DOTS) {
@@ -161,7 +169,7 @@ static void drawClock(GPoint center, GContext *ctx){
 		if(!isAnimating && hour_mark) {			
 			if(clock_is_24h_style() || getFull_hour_mode()){
 				graphics_draw_text(ctx,
-					txt[(i % (24*4))/4],
+					txt[(i % (24*mark_space))/mark_space],
 					custom_font,
 					GRect(segA.x-25, segA.y-25, 50, 50),
 					GTextOverflowModeWordWrap,
@@ -170,7 +178,7 @@ static void drawClock(GPoint center, GContext *ctx){
 			}
 			else {
 				graphics_draw_text(ctx,
-					(i % (12*4))/4 == 0 ? "12" : txt[(i % (12*4))/4],
+					(i % (12*mark_space))/mark_space == 0 ? "12" : txt[(i % (12*mark_space))/mark_space],
 					custom_font,
 					GRect(segA.x-25, segA.y-25, 50, 50),
 					GTextOverflowModeWordWrap,
