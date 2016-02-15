@@ -142,6 +142,43 @@
         { 
           "label": "Minutes",
           "value": 2 
+        },
+        { 
+          "label": "Battery",
+          "value": 3 
+        },
+        { 
+          "label": "Step count",
+          "value": 4 
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "secondary_display",
+      "appKey": "secondary_display",
+      "defaultValue": "0",
+      "label": "Secondary Display",
+      "options": [
+        { 
+          "label": "Nothing", 
+          "value": 0
+        },
+        { 
+          "label": "Date",
+          "value": 1 
+        },
+        { 
+          "label": "Minutes",
+          "value": 2 
+        },
+        { 
+          "label": "Battery",
+          "value": 3 
+        },
+        { 
+          "label": "Step count",
+          "value": 4 
         }
       ]
     },

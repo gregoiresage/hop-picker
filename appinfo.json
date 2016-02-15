@@ -12,7 +12,10 @@
     "mark_style": 10,
     "info_display": 11,
     "info_text_size": 12,
-    "mark_space": 13
+    "mark_space": 13,
+    "secondary_display": 14,
+    "step_day_goal": 15,
+    "secondary_display_timeout": 16
   },
   "longName": "HopPicker",
   "versionCode": 0,

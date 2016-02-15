@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "enamel.h"
 #include "gbitmap_color_palette_manipulator.h"
+#include "health.h"
 
 static Window *window = NULL;
 static Layer  *layer = NULL;
@@ -21,7 +22,7 @@ static const GPathInfo BIG_LINE_HAND_24_POINTS =  {4,(GPoint []) {{-5, 0},{-5, -
 static const GPathInfo ARROW_HAND_24_POINTS = {4,(GPoint []) {{-9*2, 0},{-2, -175-150},{2, -175-150},{9*2, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
-static char info_text[5] = "0000";
+static char info_text[9] = "00000000";
 
 static Animation* animation;
 static AnimationImplementation animImpl;
@@ -45,6 +46,8 @@ static int day = 0;
 
 static int layer_update_count = 0;
 
+static AppTimer *secondary_display_timer;
+
 #define DATE_POSITION_FROM_CENTER 100
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
@@ -65,8 +68,40 @@ static GPath *big_line_mark_path;
 #define SCREEN_HEIGHT 168
 #endif
 
-static bool containsCircle(GPoint center, int radius){
-	return center.x - radius > 0 && center.x + radius < SCREEN_WIDTH && center.y - radius > 0 && center.y + radius < SCREEN_HEIGHT;
+static bool containsCircle(GPoint p, int radius){
+	GRect bounds = layer_get_bounds(layer);
+#ifdef PBL_ROUND
+	GPoint center = grect_center_point(&bounds);
+	uint32_t dist_x = center.x - p.x;
+	uint32_t dist_y = center.y - p.y;
+	uint32_t dist_max = 90 - radius;
+	return dist_x * dist_x + dist_y * dist_y < dist_max * dist_max;
+#else
+	return p.x - radius > 0 && p.x + radius < bounds.size.w && p.y - radius > 0 && p.y + radius < bounds.size.h;
+#endif
+}
+
+static bool contains_grect(const GRect * other){
+#ifdef PBL_ROUND
+	GPoint p = other->origin;
+	if(!containsCircle(p,0))
+		return false;
+	p.x += other->size.w;
+	if(!containsCircle(p,0))
+		return false;
+	p.y += other->size.h;
+	if(!containsCircle(p,0))
+		return false;
+	p.x -= other->size.w;
+	if(!containsCircle(p,0))
+		return false;
+	return true;
+#else
+	GRect bounds = layer_get_bounds(layer);
+	GPoint bottom = {other->origin.x + other->size.w, other->origin.y + other->size.h};
+	return 
+		grect_contains_point(&bounds, &other->origin) && grect_contains_point(&bounds, &bottom);
+#endif
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -202,55 +237,65 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 			outer_radius = 17;
 			inner_radius = 14;
 			font = small_font;
-			font_height = 14;
+			// font_height = 14;
 			break;
 		case INFO_TEXT_SIZE_LARGER : 
 			outer_radius = 23;
 			inner_radius = 20;
 			font = medium_font;
-			font_height = 20;
+			// font_height = 20;
 			break;
 	}
 
-#ifdef PBL_ROUND
-	uint8_t pos = get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
-	pos -= 87;
-	pos += outer_radius;
-	segA.y = (int16_t)(-cos_lookup(angle) * pos / TRIG_MAX_RATIO) + center.y;
-	segA.x = (int16_t)(sin_lookup(angle) * pos / TRIG_MAX_RATIO) + center.x;
-#else
+	GRect text_bounds = (GRect){.origin={0,0},.size={120,120}};
+	GSize text_size = graphics_text_layout_get_content_size(text,font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
+
+	bool drawCircle = strlen(text) < 3;
 
 	int32_t posFromCenter = get_full_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
+	GRect outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
+	GRect bounds = layer_get_bounds(layer);
+	text_bounds.size = text_size;
 
 	do{
 		segA.y = (int16_t)(-cos_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.y;
 		segA.x = (int16_t)(sin_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.x;
 		posFromCenter--;
-	}
-	while(containsCircle(segA, outer_radius + 1));
 
-#endif
+		text_bounds.origin = segA;
+		text_bounds.origin.x -= text_size.w/2;
+		text_bounds.origin.y -= text_size.h/2; //font_height/2 + (text_size.h - font_height);
+		
+		outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
+	}
+	while((drawCircle && containsCircle(segA, outer_radius + 3)) || (!drawCircle && contains_grect(&outside)));
 
 	graphics_context_set_text_color(ctx, text_and_dots_color);
 	graphics_context_set_stroke_color(ctx, hand_outline_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
-	graphics_fill_circle(ctx, segA, outer_radius);
-	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, segA, outer_radius);
+	if(drawCircle){
+		graphics_fill_circle(ctx, segA, outer_radius);
+		if(!gcolor_equal(hand_outline_color,GColorClear)){
+			graphics_draw_circle(ctx, segA, outer_radius);
+		}
 	}
+	else
+		graphics_fill_rect(ctx, grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8)), 8, GCornersAll);
+	
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 
-	graphics_fill_circle(ctx, segA, inner_radius);
-	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, segA, inner_radius);
+	if(drawCircle){
+		graphics_fill_circle(ctx, segA, inner_radius);
+		if(!gcolor_equal(hand_outline_color,GColorClear)){
+			graphics_draw_circle(ctx, segA, inner_radius);
+		}
 	}
-	GRect text_bounds = (GRect){.origin=segA,.size={60,60}};
-	GSize text_size = graphics_text_layout_get_content_size(text,font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
-	text_bounds.origin.x -= text_size.w/2;
-	text_bounds.origin.y -= font_height/2 + (text_size.h - font_height) - 1;
-	text_bounds.size = text_size;
+	else
+		graphics_fill_rect(ctx, grect_inset(text_bounds, GEdgeInsets4(-3, -5, -5, -5)), 8, GCornersAll);
+	
+	
 	graphics_draw_text(ctx,
 					text,
 					font,
@@ -347,13 +392,51 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
   			}
 
 		}
-		
-		if(get_info_display() == INFO_DISPLAY_DATE){
-			snprintf(info_text, sizeof(info_text), "%d", day); 
+
+		if(secondary_display_timer != NULL && get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+			switch(get_secondary_display()) {
+				case SECONDARY_DISPLAY_DATE :
+					snprintf(info_text, sizeof(info_text), "%d", day); 
+					break;
+				case SECONDARY_DISPLAY_MINUTES :
+					snprintf(info_text, sizeof(info_text), "%02d", minutes); 
+					break;
+				case SECONDARY_DISPLAY_BATTERY :
+					snprintf(info_text, sizeof(info_text), "%02d%%", battery_state_service_peek().charge_percent); 
+					break;
+				case SECONDARY_DISPLAY_STEP_COUNT :
+					snprintf(info_text, sizeof(info_text), "%d", health_get_metric_sum(HealthMetricStepCount)); 
+					break;
+				// case SECONDARY_DISPLAY_PERCENTDAILYGOAL : ;
+				// 	int steps = health_get_metric_sum(HealthMetricStepCount);
+				// 	snprintf(info_text, sizeof(info_text), "%02ld%%", steps * 100 / getStep_day_goal()); 
+				// 	break;
+				default :
+					break;
+			}
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
-		else if(get_info_display() == INFO_DISPLAY_MINUTES){
-			snprintf(info_text, sizeof(info_text), "%d", minutes); 
+		else if(get_info_display() != INFO_DISPLAY_NOTHING){
+			switch(get_info_display()) {
+				case INFO_DISPLAY_DATE :
+					snprintf(info_text, sizeof(info_text), "%d", day); 
+					break;
+				case INFO_DISPLAY_MINUTES :
+					snprintf(info_text, sizeof(info_text), "%02d", minutes); 
+					break;
+				case INFO_DISPLAY_BATTERY :
+					snprintf(info_text, sizeof(info_text), "%02d%%", battery_state_service_peek().charge_percent); 
+					break;
+				case INFO_DISPLAY_STEP_COUNT :
+					snprintf(info_text, sizeof(info_text), "%d", health_get_metric_sum(HealthMetricStepCount)); 
+					break;
+				// case INFO_DISPLAY_PERCENTDAILYGOAL : ;
+				// 	int steps = health_get_metric_sum(HealthMetricStepCount);
+				// 	snprintf(info_text, sizeof(info_text), "%02ld%%", steps * 100 / getStep_day_goal()); 
+				// 	break;
+				default :
+					break;
+			}
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
 	}	
@@ -370,6 +453,18 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
 	layer_destroy(layer);
+}
+
+static void secondary_timer_cb(void *data) {
+	secondary_display_timer = NULL;
+	layer_mark_dirty(layer);
+}
+
+static void tap_handler(AccelAxisType axis, int32_t direction) {
+	if(get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+		secondary_display_timer = app_timer_register(9 * 1000, secondary_timer_cb, NULL);
+		layer_mark_dirty(layer);
+	}
 }
 
 static void updateSettings(){
@@ -420,6 +515,15 @@ static void updateSettings(){
 		hand_outline_color = gcolor_equal(hand_color,GColorWhite) ? GColorBlack : GColorWhite;
 
 	replace_gbitmap_color(GColorBlack, text_and_dots_color, bt_disconnected);
+
+	switch(get_secondary_display()) {
+		case SECONDARY_DISPLAY_NOTHING :
+			accel_tap_service_unsubscribe();
+			break;
+		default :
+			accel_tap_service_subscribe(tap_handler);
+			break;
+	}
 
 	window_set_background_color(window, bg_color);
 }
