@@ -1,0 +1,190 @@
+[
+{ "type": "heading", "defaultValue": "HopPicker" },
+{
+  "type": "section",
+  "items": [
+    {
+      "type": "heading",
+      "defaultValue": "Style"
+    },
+    {
+      "type": "select",
+      "id": "color_theme",
+      "appKey": "color_theme",
+      "defaultValue": "0",
+      "label": "Color Style",
+      "options": [
+        { 
+          "label": "Dark", 
+          "value": 0
+        },
+        { 
+          "label": "Clear",
+          "value": 1 
+        },
+        { 
+          "label": "White on Black",
+          "value": 2 
+        },
+        { 
+          "label": "Black on White",
+          "value": 3 
+        }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "full_hour_mode",
+      "appKey": "full_hour_mode",
+      "label": "24 hours mode</sup></html>"
+    },
+    {
+      "type": "color",
+      "id": "hand_color",
+      "appKey": "hand_color",
+      "defaultValue": "FF0000",
+      "label": "Watch hand color"
+    },
+    {
+      "type": "select",
+      "id": "hand",
+      "appKey": "hand",
+      "defaultValue": "0",
+      "label": "Hand Style",
+      "options": [
+        { 
+          "label": "Line", 
+          "value": 0
+        },
+        { 
+          "label": "Big Line",
+          "value": 1 
+        },
+        { 
+          "label": "Arrow",
+          "value": 2 
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mark_style",
+      "appKey": "mark_style",
+      "defaultValue": "0",
+      "label": "Mark Style",
+      "options": [
+        { 
+          "label": "Dots", 
+          "value": 0
+        },
+        { 
+          "label": "Lines",
+          "value": 1 
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mark_space",
+      "appKey": "mark_space",
+      "defaultValue": "15",
+      "label": "Mark space",
+      "options": [
+        { 
+          "label": "10", 
+          "value": 10
+        },
+        { 
+          "label": "15",
+          "value": 15 
+        },
+        { 
+          "label": "30",
+          "value": 30 
+        },
+        { 
+          "label": "60",
+          "value": 60 
+        }
+      ]
+    },
+    {
+      "type": "toggle",
+      "id": "animated",
+      "appKey": "animated",
+      "label": "Startup animation",
+      "defaultValue": true
+    }    
+  ]
+},
+{
+  "type": "section",
+  "items": [
+    {
+      "type": "heading",
+      "defaultValue": "Other"
+    },
+    {
+      "type": "select",
+      "id": "info_display",
+      "appKey": "info_display",
+      "defaultValue": "1",
+      "label": "Display",
+      "options": [
+        { 
+          "label": "Nothing", 
+          "value": 0
+        },
+        { 
+          "label": "Date",
+          "value": 1 
+        },
+        { 
+          "label": "Minutes",
+          "value": 2 
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "info_text_size",
+      "appKey": "info_text_size",
+      "defaultValue": "0",
+      "label": "Text Size",
+      "options": [
+        { 
+          "label": "Default", 
+          "value": 0
+        },
+        { 
+          "label": "Larger",
+          "value": 1 
+        }
+      ]
+    }
+  ]
+},
+{
+  "type": "section",
+  "items": [
+    {
+      "type": "heading",
+      "defaultValue": "Bluetooth"
+    },
+    {
+      "type": "toggle",
+      "id": "vibrate_on_bt_lost",
+      "appKey": "vibrate_on_bt_lost",
+      "label": "Vibrate on disconnection"
+    },
+    {
+      "type": "toggle",
+      "id": "display_bt_icon",
+      "appKey": "display_bt_icon",
+      "label": "Display an icon on disconnection",
+      "defaultValue": true
+    } 
+  ]
+},
+{ "type": "submit", "defaultValue": "Done" }
+]
