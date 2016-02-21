@@ -2,3 +2,4 @@
 .waf-*
 .lock-*
 build
+generated
