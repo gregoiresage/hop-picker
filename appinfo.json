@@ -1,5 +1,5 @@
 {
-  "versionLabel": "3.6",
+  "versionLabel": "3.7",
   "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
   "appKeys": {
     "hand": 3,
@@ -15,12 +15,13 @@
     "mark_space": 13
   },
   "longName": "HopPicker",
-  "versionCode": 26,
+  "versionCode": 27,
   "capabilities": [
     "configurable"
   ],
   "shortName": "HopPicker",
   "companyName": "Gregoire Sage",
+  "enableMultiJS": true,
   "watchapp": {
     "watchface": true
   },
@@ -54,134 +55,6 @@
         "type": "png",
         "name": "IMAGE_MENU_ICON",
         "file": "images/menu_icon.png"
-      }
-    ]
-  },
-  "preferences": {
-    "footer":"<div class=\"button-container\"><a href=\"https://www.paypal.me/gsage\"><input type=\"button\" class=\"item-button\" value=\"DONATE\" /></a></div></div><div class=\"item-container-footer\">If you like my work, please give a heart and share. Also feel free to make a small donation by clicking on the above button. Every gift is greatly appreciated !</div>",
-    "sections": [
-      {
-        "name": "Style",
-        "items": [
-          {
-            "name": "color_theme",
-            "title": "Color Style",
-            "type": "enum",
-            "choices": {
-              "DARK": "Dark",
-              "CLEAR": "Clear",
-              "WHITE_ON_BLACK": "White on Black",
-              "BLACK_ON_WHITE": "Black on White"
-            },
-            "default": 0
-          },
-          {
-            "name": "full_hour_mode",
-            "title": "24 hours mode",
-            "type": "boolean",
-            "description": "12 hours around the edge or all 24 hours",
-            "off-text": "12 hours",
-            "on-text": "24 hours",
-            "default": false
-          },
-          {
-            "name": "hand_color",
-            "title": "Watch hand color",
-            "type": "color",
-            "default": "GColorRed"
-          },
-          {
-            "name": "hand",
-            "title": "Watch hand style",
-            "type": "enum",
-            "choices": {
-              "LINE": "Line",
-              "BIGLINE": "Big Line",
-              "ARROW": "Arrow"
-            },
-            "default": 0
-          },
-          {
-            "name": "mark_style",
-            "title": "Mark style",
-            "type": "enum",
-            "choices": {
-              "DOTS": "Dots",
-              "LINE": "Lines"
-            },
-            "default": 0
-          },
-          {
-            "name": "mark_space",
-            "title": "Mark space",
-            "description": "Display a mark every X minutes",
-            "type": "enum",
-            "choices": {
-              "10": "10",
-              "15": "15",
-              "30": "30",
-              "60": "60"
-            },
-            "default": 1
-          },
-          {
-            "name": "animated",
-            "title": "Startup animation",
-            "type": "boolean",
-            "off-text": "OFF",
-            "on-text": "ON",
-            "default": true
-          }
-        ]
-      },
-      {
-        "name": "Other",
-        "items": [
-          {
-            "name": "info_display",
-            "title": "Display",
-            "type": "enum",
-            "choices": {
-              "NO": "Nothing",
-              "DATE": "Date",
-              "MINUTE": "Minutes"
-            },
-            "default": 1
-          },
-          {
-            "name": "info_text_size",
-            "title": "Text Size",
-            "type": "enum",
-            "choices": {
-              "DEFAULT": "Default",
-              "LARGER": "Larger"
-            },
-            "default": 0
-          }
-        ]
-      },
-      {
-        "name": "Bluetooth",
-        "items": [
-          {
-            "name": "vibrate_on_bt_lost",
-            "title": "Vibrate",
-            "description": "Vibrate on disconnection",
-            "type": "boolean",
-            "off-text": "OFF",
-            "on-text": "ON",
-            "default": false
-          },
-          {
-            "name": "display_bt_icon",
-            "title": "Display icon",
-            "description": "Display an icon on disconnection",
-            "type": "boolean",
-            "off-text": "OFF",
-            "on-text": "ON",
-            "default": true
-          }
-        ]
       }
     ]
   },

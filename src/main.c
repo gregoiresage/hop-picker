@@ -1,5 +1,5 @@
 #include <pebble.h>
-#include "autoconfig.h"
+#include "generated/enamel.h"
 #include "gbitmap_color_palette_manipulator.h"
 
 static Window *window = NULL;
@@ -352,7 +352,7 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 			snprintf(info_text, sizeof(info_text), "%d", day); 
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
-		else if(getInfo_display() == INFO_DISPLAY_MINUTE){
+		else if(getInfo_display() == INFO_DISPLAY_MINUTES){
 			snprintf(info_text, sizeof(info_text), "%d", minutes); 
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
@@ -376,7 +376,7 @@ static void updateSettings(){
 	gpath_destroy(hour_arrow);
 	switch(getHand()){
 		case HAND_LINE : hour_arrow = gpath_create(getFull_hour_mode() ? &LINE_HAND_24_POINTS : &LINE_HAND_POINTS); break;
-		case HAND_BIGLINE : hour_arrow = gpath_create(getFull_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
+		case HAND_BIG_LINE : hour_arrow = gpath_create(getFull_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
 		case HAND_ARROW : 
 		default : hour_arrow = gpath_create(getFull_hour_mode() ? &ARROW_HAND_24_POINTS : &ARROW_HAND_POINTS); break;
 	}
@@ -425,11 +425,7 @@ static void updateSettings(){
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
-  	// call autoconf_in_received_handler
-	autoconfig_in_received_handler(iter, context);
-
 	updateSettings();
-
 	layer_mark_dirty(layer);
 }
 
@@ -448,7 +444,8 @@ static void bluetooth_connection_handler(bool connected){
 }
 
 static void init(void) {
-	autoconfig_init(200,0);
+	enamel_init(0,0);
+	enamel_register_custom_inbox_received(in_received_handler);
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
@@ -463,8 +460,6 @@ static void init(void) {
 
 	small_line_mark_path = gpath_create(&SMALL_LINE_MARK_POINTS);
 	big_line_mark_path = gpath_create(&BIG_LINE_MARK_POINTS);
-
-	app_message_register_inbox_received(in_received_handler);
 
 	btConnected = bluetooth_connection_service_peek();
 	bluetooth_connection_service_subscribe(bluetooth_connection_handler);
@@ -485,7 +480,7 @@ static void init(void) {
 }
 
 static void deinit(void) {
-	autoconfig_deinit();
+	enamel_deinit();
 	fonts_unload_custom_font(custom_font);
 	fonts_unload_custom_font(small_font);
 	fonts_unload_custom_font(medium_font);
