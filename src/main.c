@@ -60,14 +60,6 @@ static const GPathInfo BIG_LINE_MARK_POINTS   =  {4,(GPoint []) {{-3, 4},{-3, -1
 static GPath *small_line_mark_path;
 static GPath *big_line_mark_path;
 
-#ifdef PBL_ROUND
-#define SCREEN_WIDTH 180
-#define SCREEN_HEIGHT 180
-#else
-#define SCREEN_WIDTH 144
-#define SCREEN_HEIGHT 168
-#endif
-
 static bool containsCircle(GPoint p, int radius){
 	GRect bounds = layer_get_bounds(layer);
 #ifdef PBL_ROUND
@@ -112,11 +104,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 		layer_mark_dirty(layer);
 }
 
-#ifdef PBL_SDK_3
 static void animationUpdate(Animation *animation, const AnimationProgress progress) {
-#else
-static void animationUpdate(Animation *animation, const uint32_t progress) {
-#endif
 	percent = progress * 100 / ANIMATION_NORMALIZED_MAX;
 	layer_mark_dirty(layer);
 }
@@ -130,15 +118,13 @@ static void animation_stopped(Animation *animation, bool finished, void *data) {
 	percent = 100;
 	isAnimating = false;
 	layer_mark_dirty(layer);
-#ifndef PBL_SDK_3
-	animation_destroy(animation);
-	animation = NULL;
-#endif
 }
 
 static void drawClock(GPoint center, GContext *ctx){
 	GPoint segA;
 	GPoint segC;
+
+	GRect bounds = layer_get_bounds(layer);
 
 	uint16_t segA_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
 	uint16_t segC_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
@@ -173,8 +159,8 @@ static void drawClock(GPoint center, GContext *ctx){
 		}
 
 		if(isAnimating){
-			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - SCREEN_HEIGHT/2) * percent / 100 + SCREEN_HEIGHT/2;
-			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - SCREEN_WIDTH/2) * percent / 100 + SCREEN_WIDTH/2;
+			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - bounds.size.h/2) * percent / 100 + bounds.size.h/2;
+			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - bounds.size.w/2) * percent / 100 + bounds.size.w/2;
 			segA.x = segA.y = 0;
 		}
 		else {
@@ -229,7 +215,6 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 
 	uint16_t outer_radius = 0;
 	uint16_t inner_radius = 0;
-	uint16_t font_height = 0;
 	GFont font = small_font;
 
 	switch(get_info_text_size()){
@@ -237,13 +222,11 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 			outer_radius = 17;
 			inner_radius = 14;
 			font = small_font;
-			// font_height = 14;
 			break;
 		case INFO_TEXT_SIZE_LARGER : 
 			outer_radius = 23;
 			inner_radius = 20;
 			font = medium_font;
-			// font_height = 20;
 			break;
 	}
 
@@ -254,7 +237,6 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 
 	int32_t posFromCenter = get_full_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
 	GRect outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
-	GRect bounds = layer_get_bounds(layer);
 	text_bounds.size = text_size;
 
 	do{
@@ -264,7 +246,7 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 
 		text_bounds.origin = segA;
 		text_bounds.origin.x -= text_size.w/2;
-		text_bounds.origin.y -= text_size.h/2; //font_height/2 + (text_size.h - font_height);
+		text_bounds.origin.y -= text_size.h/2;
 		
 		outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
 	}
@@ -376,15 +358,15 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 				else if(hours < 12)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
 				else if(hours < 18)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,0,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,0,32,32));
 				else 
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,160-32,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,160-32,32,32));
 			}
   			else {
 				if(hours % 12 < 3)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,0,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,0,32,32));
 				else if(hours % 12 < 6)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,160-32,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,160-32,32,32));
 				else if(hours % 12 < 9)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
 				else 
