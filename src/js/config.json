@@ -36,7 +36,8 @@
       "type": "toggle",
       "id": "full_hour_mode",
       "appKey": "full_hour_mode",
-      "label": "24 hours mode</sup></html>"
+      "label": "24 hours mode",
+      "description" : "12 hours around the edge or all 24 hours"
     },
     {
       "type": "color",
@@ -89,6 +90,7 @@
       "appKey": "mark_space",
       "defaultValue": "15",
       "label": "Mark space",
+      "description" : "Display a mark every X minutes",
       "options": [
         { 
           "label": "10", 
@@ -159,6 +161,7 @@
       "appKey": "secondary_display",
       "defaultValue": "0",
       "label": "Secondary Display",
+      "description" : "Shake your watch to show the secondary display for 9 seconds",
       "options": [
         { 
           "label": "Nothing", 
@@ -212,13 +215,15 @@
       "type": "toggle",
       "id": "vibrate_on_bt_lost",
       "appKey": "vibrate_on_bt_lost",
-      "label": "Vibrate on disconnection"
+      "label": "Vibrate",
+      "description": "Vibrate on disconnection"
     },
     {
       "type": "toggle",
       "id": "display_bt_icon",
       "appKey": "display_bt_icon",
-      "label": "Display an icon on disconnection",
+      "label": "Display icon",
+      "description": "Display an icon on disconnection",
       "defaultValue": true
     } 
   ]
