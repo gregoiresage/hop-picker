@@ -48,7 +48,7 @@ static int layer_update_count = 0;
 
 static AppTimer *secondary_display_timer;
 
-#define DATE_POSITION_FROM_CENTER 100
+#define DATE_POSITION_FROM_CENTER 110
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
 
@@ -66,7 +66,7 @@ static bool containsCircle(GPoint p, int radius){
 	GPoint center = grect_center_point(&bounds);
 	uint32_t dist_x = center.x - p.x;
 	uint32_t dist_y = center.y - p.y;
-	uint32_t dist_max = 90 - radius;
+	uint32_t dist_max = 86 - radius;
 	return dist_x * dist_x + dist_y * dist_y < dist_max * dist_max;
 #else
 	return p.x - radius > 0 && p.x + radius < bounds.size.w && p.y - radius > 0 && p.y + radius < bounds.size.h;
