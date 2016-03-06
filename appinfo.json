@@ -37,19 +37,19 @@
         "file": "fonts/Comfortaa-Bold.ttf"
       },
       {
-        "characterRegex": "[0-9]",
+        "characterRegex": "[0-9%]",
         "type": "font",
         "name": "COMFORTAA_18",
         "file": "fonts/Comfortaa-Bold.ttf"
       },
       {
-        "characterRegex": "[0-9]",
+        "characterRegex": "[0-9%]",
         "type": "font",
         "name": "COMFORTAA_26",
         "file": "fonts/Comfortaa-Bold.ttf"
       },
       {
-        "type": "png",
+        "type": "bitmap",
         "name": "IMAGE_BT_DISCONNECTED",
         "file": "images/bluetooth_not_connected.png"
       },
