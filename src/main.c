@@ -1,6 +1,7 @@
 #include <pebble.h>
-#include "generated/enamel.h"
+#include "enamel.h"
 #include "gbitmap_color_palette_manipulator.h"
+#include "health.h"
 
 static Window *window = NULL;
 static Layer  *layer = NULL;
@@ -21,7 +22,7 @@ static const GPathInfo BIG_LINE_HAND_24_POINTS =  {4,(GPoint []) {{-5, 0},{-5, -
 static const GPathInfo ARROW_HAND_24_POINTS = {4,(GPoint []) {{-9*2, 0},{-2, -175-150},{2, -175-150},{9*2, 0}}};
 
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
-static char info_text[5] = "0000";
+static char info_text[9] = "00000000";
 
 static Animation* animation;
 static AnimationImplementation animImpl;
@@ -45,7 +46,9 @@ static int day = 0;
 
 static int layer_update_count = 0;
 
-#define DATE_POSITION_FROM_CENTER 100
+static AppTimer *secondary_display_timer;
+
+#define DATE_POSITION_FROM_CENTER 110
 #define SECOND_HAND_LENGTH_A 150
 #define SECOND_HAND_LENGTH_C 180
 
@@ -57,16 +60,40 @@ static const GPathInfo BIG_LINE_MARK_POINTS   =  {4,(GPoint []) {{-3, 4},{-3, -1
 static GPath *small_line_mark_path;
 static GPath *big_line_mark_path;
 
+static bool containsCircle(GPoint p, int radius){
+	GRect bounds = layer_get_bounds(layer);
 #ifdef PBL_ROUND
-#define SCREEN_WIDTH 180
-#define SCREEN_HEIGHT 180
+	GPoint center = grect_center_point(&bounds);
+	uint32_t dist_x = center.x - p.x;
+	uint32_t dist_y = center.y - p.y;
+	uint32_t dist_max = 86 - radius;
+	return dist_x * dist_x + dist_y * dist_y < dist_max * dist_max;
 #else
-#define SCREEN_WIDTH 144
-#define SCREEN_HEIGHT 168
+	return p.x - radius > 0 && p.x + radius < bounds.size.w && p.y - radius > 0 && p.y + radius < bounds.size.h;
 #endif
+}
 
-static bool containsCircle(GPoint center, int radius){
-	return center.x - radius > 0 && center.x + radius < SCREEN_WIDTH && center.y - radius > 0 && center.y + radius < SCREEN_HEIGHT;
+static bool contains_grect(const GRect * other){
+#ifdef PBL_ROUND
+	GPoint p = other->origin;
+	if(!containsCircle(p,0))
+		return false;
+	p.x += other->size.w;
+	if(!containsCircle(p,0))
+		return false;
+	p.y += other->size.h;
+	if(!containsCircle(p,0))
+		return false;
+	p.x -= other->size.w;
+	if(!containsCircle(p,0))
+		return false;
+	return true;
+#else
+	GRect bounds = layer_get_bounds(layer);
+	GPoint bottom = {other->origin.x + other->size.w, other->origin.y + other->size.h};
+	return 
+		grect_contains_point(&bounds, &other->origin) && grect_contains_point(&bounds, &bottom);
+#endif
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
@@ -77,11 +104,7 @@ static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
 		layer_mark_dirty(layer);
 }
 
-#ifdef PBL_SDK_3
 static void animationUpdate(Animation *animation, const AnimationProgress progress) {
-#else
-static void animationUpdate(Animation *animation, const uint32_t progress) {
-#endif
 	percent = progress * 100 / ANIMATION_NORMALIZED_MAX;
 	layer_mark_dirty(layer);
 }
@@ -95,18 +118,16 @@ static void animation_stopped(Animation *animation, bool finished, void *data) {
 	percent = 100;
 	isAnimating = false;
 	layer_mark_dirty(layer);
-#ifndef PBL_SDK_3
-	animation_destroy(animation);
-	animation = NULL;
-#endif
 }
 
 static void drawClock(GPoint center, GContext *ctx){
 	GPoint segA;
 	GPoint segC;
 
-	uint16_t segA_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
-	uint16_t segC_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
+	GRect bounds = layer_get_bounds(layer);
+
+	uint16_t segA_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	uint16_t segC_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 	graphics_fill_circle(ctx, center, segC_length);
@@ -119,7 +140,7 @@ static void drawClock(GPoint center, GContext *ctx){
 	int maxhour = hours + 24 + 3;
 
 	int mark_space = 1;
-	switch(getMark_space()){
+	switch(get_mark_space()){
 		case MARK_SPACE_10 : mark_space = 6; break;
 		case MARK_SPACE_15 : mark_space = 4; break;
 		case MARK_SPACE_30 : mark_space = 2; break;
@@ -128,18 +149,18 @@ static void drawClock(GPoint center, GContext *ctx){
 	
 	for(int i=minhour*mark_space; i<maxhour*mark_space; i++){
 		int32_t angle = 
-			getFull_hour_mode() ?
+			get_full_hour_mode() ?
 				TRIG_MAX_ANGLE * (i % (24*mark_space)) / (24*mark_space):
 				TRIG_MAX_ANGLE * (i % (12*mark_space)) / (12*mark_space);
 				;
-		if(getFull_hour_mode()){
+		if(get_full_hour_mode()){
 			angle += TRIG_MAX_ANGLE / 2;
 			angle = angle % TRIG_MAX_ANGLE;
 		}
 
 		if(isAnimating){
-			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - SCREEN_HEIGHT/2) * percent / 100 + SCREEN_HEIGHT/2;
-			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - SCREEN_WIDTH/2) * percent / 100 + SCREEN_WIDTH/2;
+			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - bounds.size.h/2) * percent / 100 + bounds.size.h/2;
+			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - bounds.size.w/2) * percent / 100 + bounds.size.w/2;
 			segA.x = segA.y = 0;
 		}
 		else {
@@ -152,7 +173,7 @@ static void drawClock(GPoint center, GContext *ctx){
 		bool hour_mark = (i % mark_space) == 0;
 		uint8_t radius = hour_mark ? BIG_DOT_RADIUS : SMALL_DOT_RADIUS ;
 
-		if(getMark_style() == MARK_STYLE_DOTS) {
+		if(get_mark_style() == MARK_STYLE_DOTS) {
 			graphics_fill_circle(ctx, segC, radius);
 			graphics_draw_circle(ctx, segC, radius);
 		}
@@ -162,12 +183,12 @@ static void drawClock(GPoint center, GContext *ctx){
 			gpath_rotate_to(mark_path, angle);
 			gpath_draw_filled(ctx, mark_path);
 			// don't draw the outline for 'monochrome' themes
-			if(getColor_theme() == COLOR_THEME_BLACK_ON_WHITE || getColor_theme() == COLOR_THEME_WHITE_ON_BLACK)
+			if(get_color_theme() == COLOR_THEME_BLACK_ON_WHITE || get_color_theme() == COLOR_THEME_WHITE_ON_BLACK)
 				gpath_draw_outline(ctx, mark_path);
 		}
 		
 		if(!isAnimating && hour_mark) {			
-			if(clock_is_24h_style() || getFull_hour_mode()){
+			if(clock_is_24h_style() || get_full_hour_mode()){
 				graphics_draw_text(ctx,
 					txt[(i % (24*mark_space))/mark_space],
 					custom_font,
@@ -194,63 +215,69 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 
 	uint16_t outer_radius = 0;
 	uint16_t inner_radius = 0;
-	uint16_t font_height = 0;
 	GFont font = small_font;
 
-	switch(getInfo_text_size()){
+	switch(get_info_text_size()){
 		case INFO_TEXT_SIZE_DEFAULT : 
 			outer_radius = 17;
 			inner_radius = 14;
 			font = small_font;
-			font_height = 14;
 			break;
 		case INFO_TEXT_SIZE_LARGER : 
 			outer_radius = 23;
 			inner_radius = 20;
 			font = medium_font;
-			font_height = 20;
 			break;
 	}
 
-#ifdef PBL_ROUND
-	uint8_t pos = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
-	pos -= 87;
-	pos += outer_radius;
-	segA.y = (int16_t)(-cos_lookup(angle) * pos / TRIG_MAX_RATIO) + center.y;
-	segA.x = (int16_t)(sin_lookup(angle) * pos / TRIG_MAX_RATIO) + center.x;
-#else
+	GRect text_bounds = (GRect){.origin={0,0},.size={120,120}};
+	GSize text_size = graphics_text_layout_get_content_size(text,font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
 
-	int32_t posFromCenter = getFull_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
+	bool drawCircle = strlen(text) < 3;
+
+	int32_t posFromCenter = get_full_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
+	GRect outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
+	text_bounds.size = text_size;
 
 	do{
 		segA.y = (int16_t)(-cos_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.y;
 		segA.x = (int16_t)(sin_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.x;
 		posFromCenter--;
-	}
-	while(containsCircle(segA, outer_radius + 1));
 
-#endif
+		text_bounds.origin = segA;
+		text_bounds.origin.x -= text_size.w/2;
+		text_bounds.origin.y -= text_size.h/2;
+		
+		outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
+	}
+	while((drawCircle && containsCircle(segA, outer_radius + 3)) || (!drawCircle && contains_grect(&outside)));
 
 	graphics_context_set_text_color(ctx, text_and_dots_color);
 	graphics_context_set_stroke_color(ctx, hand_outline_color);
 	graphics_context_set_fill_color(ctx, hand_color);
 
-	graphics_fill_circle(ctx, segA, outer_radius);
-	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, segA, outer_radius);
+	if(drawCircle){
+		graphics_fill_circle(ctx, segA, outer_radius);
+		if(!gcolor_equal(hand_outline_color,GColorClear)){
+			graphics_draw_circle(ctx, segA, outer_radius);
+		}
 	}
+	else
+		graphics_fill_rect(ctx, grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8)), 8, GCornersAll);
+	
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 
-	graphics_fill_circle(ctx, segA, inner_radius);
-	if(!gcolor_equal(hand_outline_color,GColorClear)){
-		graphics_draw_circle(ctx, segA, inner_radius);
+	if(drawCircle){
+		graphics_fill_circle(ctx, segA, inner_radius);
+		if(!gcolor_equal(hand_outline_color,GColorClear)){
+			graphics_draw_circle(ctx, segA, inner_radius);
+		}
 	}
-	GRect text_bounds = (GRect){.origin=segA,.size={60,60}};
-	GSize text_size = graphics_text_layout_get_content_size(text,font,text_bounds,GTextOverflowModeWordWrap,GTextAlignmentCenter);
-	text_bounds.origin.x -= text_size.w/2;
-	text_bounds.origin.y -= font_height/2 + (text_size.h - font_height) - 1;
-	text_bounds.size = text_size;
+	else
+		graphics_fill_rect(ctx, grect_inset(text_bounds, GEdgeInsets4(-3, -5, -5, -5)), 8, GCornersAll);
+	
+	
 	graphics_draw_text(ctx,
 					text,
 					font,
@@ -297,16 +324,16 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	}
 	
 	int32_t angle = 
-		getFull_hour_mode() ?
+		get_full_hour_mode() ?
 			TRIG_MAX_ANGLE * ((hours % 24) * 60 + minutes) / (24 * 60):
 			TRIG_MAX_ANGLE * ((hours % 12) * 60 + minutes) / (12 * 60);
 			
-	if(getFull_hour_mode()){
+	if(get_full_hour_mode()){
 		angle += TRIG_MAX_ANGLE / 2;
 		angle = angle % TRIG_MAX_ANGLE;
 	}
 
-	uint16_t segA_length = getFull_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	uint16_t segA_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
 
 	GPoint centerClock;
 	centerClock.y = (int16_t)(cos_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.y;
@@ -317,7 +344,7 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	if(!isAnimating){
 		drawHand(centerClock, angle, ctx);
 
-		if(getDisplay_bt_icon() && !btConnected){
+		if(get_display_bt_icon() && !btConnected){
 #ifdef PBL_COLOR
   			graphics_context_set_compositing_mode(ctx,GCompOpSet);
 #else
@@ -325,21 +352,21 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
   				graphics_context_set_compositing_mode(ctx,GCompOpAssignInverted);
 #endif
 
-  			if(getFull_hour_mode()){
+  			if(get_full_hour_mode()){
 				if(hours < 6)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
 				else if(hours < 12)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
 				else if(hours < 18)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,0,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,0,32,32));
 				else 
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,160-32,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,160-32,32,32));
 			}
   			else {
 				if(hours % 12 < 3)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,0,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,0,32,32));
 				else if(hours % 12 < 6)
-					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(SCREEN_WIDTH-32,160-32,32,32));
+					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(bounds.size.w-32,160-32,32,32));
 				else if(hours % 12 < 9)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
 				else 
@@ -347,13 +374,51 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
   			}
 
 		}
-		
-		if(getInfo_display() == INFO_DISPLAY_DATE){
-			snprintf(info_text, sizeof(info_text), "%d", day); 
+
+		if(secondary_display_timer != NULL && get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+			switch(get_secondary_display()) {
+				case SECONDARY_DISPLAY_DATE :
+					snprintf(info_text, sizeof(info_text), "%d", day); 
+					break;
+				case SECONDARY_DISPLAY_MINUTES :
+					snprintf(info_text, sizeof(info_text), "%02d", minutes); 
+					break;
+				case SECONDARY_DISPLAY_BATTERY :
+					snprintf(info_text, sizeof(info_text), "%02d%%", battery_state_service_peek().charge_percent); 
+					break;
+				case SECONDARY_DISPLAY_STEP_COUNT :
+					snprintf(info_text, sizeof(info_text), "%d", health_get_metric_sum(HealthMetricStepCount)); 
+					break;
+				// case SECONDARY_DISPLAY_PERCENTDAILYGOAL : ;
+				// 	int steps = health_get_metric_sum(HealthMetricStepCount);
+				// 	snprintf(info_text, sizeof(info_text), "%02ld%%", steps * 100 / getStep_day_goal()); 
+				// 	break;
+				default :
+					break;
+			}
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
-		else if(getInfo_display() == INFO_DISPLAY_MINUTES){
-			snprintf(info_text, sizeof(info_text), "%d", minutes); 
+		else if(get_info_display() != INFO_DISPLAY_NOTHING){
+			switch(get_info_display()) {
+				case INFO_DISPLAY_DATE :
+					snprintf(info_text, sizeof(info_text), "%d", day); 
+					break;
+				case INFO_DISPLAY_MINUTES :
+					snprintf(info_text, sizeof(info_text), "%02d", minutes); 
+					break;
+				case INFO_DISPLAY_BATTERY :
+					snprintf(info_text, sizeof(info_text), "%02d%%", battery_state_service_peek().charge_percent); 
+					break;
+				case INFO_DISPLAY_STEP_COUNT :
+					snprintf(info_text, sizeof(info_text), "%d", health_get_metric_sum(HealthMetricStepCount)); 
+					break;
+				// case INFO_DISPLAY_PERCENTDAILYGOAL : ;
+				// 	int steps = health_get_metric_sum(HealthMetricStepCount);
+				// 	snprintf(info_text, sizeof(info_text), "%02ld%%", steps * 100 / getStep_day_goal()); 
+				// 	break;
+				default :
+					break;
+			}
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
 	}	
@@ -372,16 +437,28 @@ static void window_unload(Window *window) {
 	layer_destroy(layer);
 }
 
+static void secondary_timer_cb(void *data) {
+	secondary_display_timer = NULL;
+	layer_mark_dirty(layer);
+}
+
+static void tap_handler(AccelAxisType axis, int32_t direction) {
+	if(get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+		secondary_display_timer = app_timer_register(9 * 1000, secondary_timer_cb, NULL);
+		layer_mark_dirty(layer);
+	}
+}
+
 static void updateSettings(){
 	gpath_destroy(hour_arrow);
-	switch(getHand()){
-		case HAND_LINE : hour_arrow = gpath_create(getFull_hour_mode() ? &LINE_HAND_24_POINTS : &LINE_HAND_POINTS); break;
-		case HAND_BIG_LINE : hour_arrow = gpath_create(getFull_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
+	switch(get_hand()){
+		case HAND_LINE : hour_arrow = gpath_create(get_full_hour_mode() ? &LINE_HAND_24_POINTS : &LINE_HAND_POINTS); break;
+		case HAND_BIG_LINE : hour_arrow = gpath_create(get_full_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
 		case HAND_ARROW : 
-		default : hour_arrow = gpath_create(getFull_hour_mode() ? &ARROW_HAND_24_POINTS : &ARROW_HAND_POINTS); break;
+		default : hour_arrow = gpath_create(get_full_hour_mode() ? &ARROW_HAND_24_POINTS : &ARROW_HAND_POINTS); break;
 	}
 
-	switch(getColor_theme()){
+	switch(get_color_theme()){
 		case COLOR_THEME_DARK : 
 			bg_color = GColorBlack;
 			bg_circle_color = GColorBlack;
@@ -413,13 +490,22 @@ static void updateSettings(){
 	}
 
 #ifdef PBL_COLOR
-	hand_color = getHand_color();
+	hand_color = get_hand_color();
 #endif
 	hand_outline_color = GColorClear;
 	if(gcolor_equal(bg_color,hand_color) || gcolor_equal(bg_circle_color,hand_color))
 		hand_outline_color = gcolor_equal(hand_color,GColorWhite) ? GColorBlack : GColorWhite;
 
 	replace_gbitmap_color(GColorBlack, text_and_dots_color, bt_disconnected);
+
+	switch(get_secondary_display()) {
+		case SECONDARY_DISPLAY_NOTHING :
+			accel_tap_service_unsubscribe();
+			break;
+		default :
+			accel_tap_service_subscribe(tap_handler);
+			break;
+	}
 
 	window_set_background_color(window, bg_color);
 }
@@ -431,7 +517,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 
 static void bluetooth_connection_handler(bool connected){
 	btConnected = connected;
-	if(getVibrate_on_bt_lost()){
+	if(get_vibrate_on_bt_lost()){
 		vibes_cancel();
 		if(connected){
 			vibes_long_pulse();
@@ -472,7 +558,7 @@ static void init(void) {
 
 	updateSettings();
 
-	isAnimating = getAnimated();
+	isAnimating = get_animated();
 	if(isAnimating)
 		percent = 0;
 

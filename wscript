@@ -1,5 +1,5 @@
 import os.path
-from enamel import enamel
+from enamel.enamel import enamel
 
 top = '.'
 out = 'build'
@@ -9,7 +9,6 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('pebble_sdk')
-    enamel.generate()
 
 def build(ctx):
     ctx.load('pebble_sdk')
@@ -21,7 +20,8 @@ def build(ctx):
         ctx.set_env(ctx.all_envs[p])
         ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
-        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'), target=app_elf)
+        ctx(rule = enamel, source='src/js/config.json', target=['enamel.c', 'enamel.h'])
+        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c') + ['enamel.c'], target=app_elf)
 
         if build_worker:
             worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)
