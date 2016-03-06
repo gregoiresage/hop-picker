@@ -20,7 +20,8 @@
   "longName": "HopPicker",
   "versionCode": 0,
   "capabilities": [
-    "configurable"
+    "configurable",
+    "health"
   ],
   "shortName": "HopPicker",
   "companyName": "Gregoire Sage",
