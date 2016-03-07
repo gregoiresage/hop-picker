@@ -228,5 +228,6 @@
     } 
   ]
 },
+{ "type": "button", "id": "donate_button","primary": false, "defaultValue": "Donate", "description" : "If you like my work, please give a heart and share. Also feel free to make a small donation by clicking on the button above. Thanks!"},
 { "type": "submit", "defaultValue": "Done" }
 ]

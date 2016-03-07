@@ -13,5 +13,10 @@ module.exports = function(minified) {
         });
       });
     };
+
+    var donate_button = Clay.getItemById('donate_button');
+    donate_button.on('click', function(){
+      window.location.href='https://www.paypal.me/gsage';
+    });
   });
 };
