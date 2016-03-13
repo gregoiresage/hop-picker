@@ -161,7 +161,7 @@
       "appKey": "secondary_display",
       "defaultValue": "0",
       "label": "Secondary Display",
-      "description" : "Shake your watch to show the secondary display for 9 seconds",
+      "description" : "Shake your watch to show the secondary display for X seconds",
       "options": [
         { 
           "label": "Nothing", 
@@ -184,6 +184,14 @@
           "value": 4 
         }
       ]
+    },
+    {
+      "type": "slider",
+      "appKey": "secondary_display_timeout",
+      "defaultValue": 9,
+      "label": "Secondary display timeout",
+      "min": 3,
+      "max": 15
     },
     {
       "type": "select",

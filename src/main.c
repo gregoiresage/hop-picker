@@ -444,7 +444,7 @@ static void secondary_timer_cb(void *data) {
 
 static void tap_handler(AccelAxisType axis, int32_t direction) {
 	if(get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
-		secondary_display_timer = app_timer_register(9 * 1000, secondary_timer_cb, NULL);
+		secondary_display_timer = app_timer_register(get_secondary_display_timeout() * 1000, secondary_timer_cb, NULL);
 		layer_mark_dirty(layer);
 	}
 }
