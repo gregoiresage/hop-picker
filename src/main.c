@@ -12,7 +12,7 @@ static GFont custom_font;
 static GFont small_font;
 static GFont medium_font;
 
-static GPath *hour_arrow;
+static GPath *hour_arrow = NULL;
 static const GPathInfo LINE_HAND_POINTS =  {4,(GPoint []) {{-3, 0},{-3, -300},{3, -300},{3, 0}}};
 static const GPathInfo BIG_LINE_HAND_POINTS =  {4,(GPoint []) {{-5, 0},{-5, -300},{5, -300},{5, 0}}};
 static const GPathInfo ARROW_HAND_POINTS = {4,(GPoint []) {{-9, 0},{-2, -175},{2, -175},{9, 0}}};
@@ -24,7 +24,7 @@ static const GPathInfo ARROW_HAND_24_POINTS = {4,(GPoint []) {{-9*2, 0},{-2, -17
 static char* txt[] = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"};
 static char info_text[9] = "00000000";
 
-static Animation* animation;
+static Animation* animation = NULL;
 static AnimationImplementation animImpl;
 
 static bool isAnimating = false;
@@ -46,7 +46,11 @@ static int day = 0;
 
 static int layer_update_count = 0;
 
-static AppTimer *secondary_display_timer;
+static bool show_secondary_info = false;
+static AppTimer *secondary_display_timer = NULL;
+static Animation* animation_secondary_display_in = NULL;
+static Animation* animation_secondary_display_out = NULL;
+static AnimationImplementation anim_secondary_displayImpl;
 
 #define DATE_POSITION_FROM_CENTER 110
 #define SECOND_HAND_LENGTH_A 150
@@ -252,6 +256,16 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 	}
 	while((drawCircle && containsCircle(segA, outer_radius + 3)) || (!drawCircle && contains_grect(&outside)));
 
+	if(animation_secondary_display_in || animation_secondary_display_out){
+		posFromCenter -= 2 * percent;
+		segA.y = (int16_t)(-cos_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.y;
+		segA.x = (int16_t)(sin_lookup(angle) * posFromCenter / TRIG_MAX_RATIO) + center.x;
+		text_bounds.origin = segA;
+		text_bounds.origin.x -= text_size.w/2;
+		text_bounds.origin.y -= text_size.h/2;
+		outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
+	}
+
 	graphics_context_set_text_color(ctx, text_and_dots_color);
 	graphics_context_set_stroke_color(ctx, hand_outline_color);
 	graphics_context_set_fill_color(ctx, hand_color);
@@ -375,7 +389,7 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 
 		}
 
-		if(secondary_display_timer != NULL && get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+		if(show_secondary_info && get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
 			switch(get_secondary_display()) {
 				case SECONDARY_DISPLAY_DATE :
 					snprintf(info_text, sizeof(info_text), "%d", day); 
@@ -437,15 +451,58 @@ static void window_unload(Window *window) {
 	layer_destroy(layer);
 }
 
+static void animation_sec_displayUpdate(Animation *animation, const AnimationProgress progress) {
+	if(progress < ANIMATION_NORMALIZED_MAX/2)
+		percent = progress * 50 / ANIMATION_NORMALIZED_MAX;
+	else {
+		percent = (ANIMATION_NORMALIZED_MAX - progress) * 50 / ANIMATION_NORMALIZED_MAX;
+		if(animation_secondary_display_in) {
+			show_secondary_info = true;
+		}
+		else {
+			show_secondary_info = false;
+		}
+	}
+	layer_mark_dirty(layer);
+}
+
+static void animation_sec_display_started(Animation *animation, void *data) {
+	percent = 0;
+}
+
+static void animation_sec_display_stopped(Animation *animation, bool finished, void *data) {
+	percent = 0;
+	animation_secondary_display_in = NULL;
+	animation_secondary_display_out = NULL;
+	layer_mark_dirty(layer);
+}
+
 static void secondary_timer_cb(void *data) {
 	secondary_display_timer = NULL;
+	animation_secondary_display_out = animation_create();
+	anim_secondary_displayImpl.update = animation_sec_displayUpdate;
+	animation_set_handlers(animation_secondary_display_out, (AnimationHandlers) {
+		.started = (AnimationStartedHandler) animation_sec_display_started,
+		.stopped = (AnimationStoppedHandler) animation_sec_display_stopped,
+	}, NULL);
+	animation_set_duration(animation_secondary_display_out, 1000);
+	animation_set_implementation(animation_secondary_display_out, &anim_secondary_displayImpl);
+	animation_schedule(animation_secondary_display_out);
 	layer_mark_dirty(layer);
 }
 
 static void tap_handler(AccelAxisType axis, int32_t direction) {
-	if(get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+	if(get_secondary_display() != SECONDARY_DISPLAY_NOTHING && !secondary_display_timer){
 		secondary_display_timer = app_timer_register(get_secondary_display_timeout() * 1000, secondary_timer_cb, NULL);
-		layer_mark_dirty(layer);
+		animation_secondary_display_in = animation_create();
+		anim_secondary_displayImpl.update = animation_sec_displayUpdate;
+		animation_set_handlers(animation_secondary_display_in, (AnimationHandlers) {
+			.started = (AnimationStartedHandler) animation_sec_display_started,
+			.stopped = (AnimationStoppedHandler) animation_sec_display_stopped,
+		}, NULL);
+		animation_set_duration(animation_secondary_display_in, 1000);
+		animation_set_implementation(animation_secondary_display_in, &anim_secondary_displayImpl);
+		animation_schedule(animation_secondary_display_in);
 	}
 }
 
