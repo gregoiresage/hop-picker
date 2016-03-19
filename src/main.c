@@ -496,7 +496,10 @@ static void updateSettings(){
 	if(gcolor_equal(bg_color,hand_color) || gcolor_equal(bg_circle_color,hand_color))
 		hand_outline_color = gcolor_equal(hand_color,GColorWhite) ? GColorBlack : GColorWhite;
 
-	replace_gbitmap_color(GColorBlack, text_and_dots_color, bt_disconnected);
+	if(bt_disconnected)
+		gbitmap_destroy(bt_disconnected);
+	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
+	replace_gbitmap_color(GColorBlack, dots_outline_color, bt_disconnected);
 
 	switch(get_secondary_display()) {
 		case SECONDARY_DISPLAY_NOTHING :
