@@ -345,12 +345,7 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 		drawHand(centerClock, angle, ctx);
 
 		if(get_display_bt_icon() && !btConnected){
-#ifdef PBL_COLOR
   			graphics_context_set_compositing_mode(ctx,GCompOpSet);
-#else
-  			if(gcolor_equal(GColorBlack,bg_color))
-  				graphics_context_set_compositing_mode(ctx,GCompOpAssignInverted);
-#endif
 
   			if(get_full_hour_mode()){
 				if(hours < 6)
