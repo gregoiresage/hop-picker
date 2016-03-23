@@ -126,8 +126,8 @@ static void drawClock(GPoint center, GContext *ctx){
 
 	GRect bounds = layer_get_bounds(layer);
 
-	uint16_t segA_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
-	uint16_t segC_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
+	uint16_t segA_length = enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	uint16_t segC_length = enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
 	graphics_fill_circle(ctx, center, segC_length);
@@ -140,7 +140,7 @@ static void drawClock(GPoint center, GContext *ctx){
 	int maxhour = hours + 24 + 3;
 
 	int mark_space = 1;
-	switch(get_mark_space()){
+	switch(enamel_get_mark_space()){
 		case MARK_SPACE_10 : mark_space = 6; break;
 		case MARK_SPACE_15 : mark_space = 4; break;
 		case MARK_SPACE_30 : mark_space = 2; break;
@@ -149,11 +149,11 @@ static void drawClock(GPoint center, GContext *ctx){
 	
 	for(int i=minhour*mark_space; i<maxhour*mark_space; i++){
 		int32_t angle = 
-			get_full_hour_mode() ?
+			enamel_get_full_hour_mode() ?
 				TRIG_MAX_ANGLE * (i % (24*mark_space)) / (24*mark_space):
 				TRIG_MAX_ANGLE * (i % (12*mark_space)) / (12*mark_space);
 				;
-		if(get_full_hour_mode()){
+		if(enamel_get_full_hour_mode()){
 			angle += TRIG_MAX_ANGLE / 2;
 			angle = angle % TRIG_MAX_ANGLE;
 		}
@@ -173,7 +173,7 @@ static void drawClock(GPoint center, GContext *ctx){
 		bool hour_mark = (i % mark_space) == 0;
 		uint8_t radius = hour_mark ? BIG_DOT_RADIUS : SMALL_DOT_RADIUS ;
 
-		if(get_mark_style() == MARK_STYLE_DOTS) {
+		if(enamel_get_mark_style() == MARK_STYLE_DOTS) {
 			graphics_fill_circle(ctx, segC, radius);
 			graphics_draw_circle(ctx, segC, radius);
 		}
@@ -183,12 +183,12 @@ static void drawClock(GPoint center, GContext *ctx){
 			gpath_rotate_to(mark_path, angle);
 			gpath_draw_filled(ctx, mark_path);
 			// don't draw the outline for 'monochrome' themes
-			if(get_color_theme() == COLOR_THEME_BLACK_ON_WHITE || get_color_theme() == COLOR_THEME_WHITE_ON_BLACK)
+			if(enamel_get_color_theme() == COLOR_THEME_BLACK_ON_WHITE || enamel_get_color_theme() == COLOR_THEME_WHITE_ON_BLACK)
 				gpath_draw_outline(ctx, mark_path);
 		}
 		
 		if(!isAnimating && hour_mark) {			
-			if(clock_is_24h_style() || get_full_hour_mode()){
+			if(clock_is_24h_style() || enamel_get_full_hour_mode()){
 				graphics_draw_text(ctx,
 					txt[(i % (24*mark_space))/mark_space],
 					custom_font,
@@ -217,7 +217,7 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 	uint16_t inner_radius = 0;
 	GFont font = small_font;
 
-	switch(get_info_text_size()){
+	switch(enamel_get_info_text_size()){
 		case INFO_TEXT_SIZE_DEFAULT : 
 			outer_radius = 17;
 			inner_radius = 14;
@@ -235,7 +235,7 @@ static void drawInfo(GPoint center, int angle, GContext *ctx, char* text){
 
 	bool drawCircle = strlen(text) < 3;
 
-	int32_t posFromCenter = get_full_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
+	int32_t posFromCenter = enamel_get_full_hour_mode() ? DATE_POSITION_FROM_CENTER + 150 : DATE_POSITION_FROM_CENTER;
 	GRect outside = grect_inset(text_bounds, GEdgeInsets4(-6, -8, -8, -8));
 	text_bounds.size = text_size;
 
@@ -324,16 +324,16 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	}
 	
 	int32_t angle = 
-		get_full_hour_mode() ?
+		enamel_get_full_hour_mode() ?
 			TRIG_MAX_ANGLE * ((hours % 24) * 60 + minutes) / (24 * 60):
 			TRIG_MAX_ANGLE * ((hours % 12) * 60 + minutes) / (12 * 60);
 			
-	if(get_full_hour_mode()){
+	if(enamel_get_full_hour_mode()){
 		angle += TRIG_MAX_ANGLE / 2;
 		angle = angle % TRIG_MAX_ANGLE;
 	}
 
-	uint16_t segA_length = get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	uint16_t segA_length = enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
 
 	GPoint centerClock;
 	centerClock.y = (int16_t)(cos_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.y;
@@ -344,15 +344,10 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 	if(!isAnimating){
 		drawHand(centerClock, angle, ctx);
 
-		if(get_display_bt_icon() && !btConnected){
-#ifdef PBL_COLOR
+		if(enamel_get_display_bt_icon() && !btConnected){
   			graphics_context_set_compositing_mode(ctx,GCompOpSet);
-#else
-  			if(gcolor_equal(GColorBlack,bg_color))
-  				graphics_context_set_compositing_mode(ctx,GCompOpAssignInverted);
-#endif
 
-  			if(get_full_hour_mode()){
+  			if(enamel_get_full_hour_mode()){
 				if(hours < 6)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
 				else if(hours < 12)
@@ -375,8 +370,8 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 
 		}
 
-		if(secondary_display_timer != NULL && get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
-			switch(get_secondary_display()) {
+		if(secondary_display_timer != NULL && enamel_get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+			switch(enamel_get_secondary_display()) {
 				case SECONDARY_DISPLAY_DATE :
 					snprintf(info_text, sizeof(info_text), "%d", day); 
 					break;
@@ -398,8 +393,8 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 			}
 			drawInfo(centerClock, angle, ctx, info_text);
 		}
-		else if(get_info_display() != INFO_DISPLAY_NOTHING){
-			switch(get_info_display()) {
+		else if(enamel_get_info_display() != INFO_DISPLAY_NOTHING){
+			switch(enamel_get_info_display()) {
 				case INFO_DISPLAY_DATE :
 					snprintf(info_text, sizeof(info_text), "%d", day); 
 					break;
@@ -443,7 +438,7 @@ static void secondary_timer_cb(void *data) {
 }
 
 static void tap_handler(AccelAxisType axis, int32_t direction) {
-	if(get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
+	if(enamel_get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
 		secondary_display_timer = app_timer_register(9 * 1000, secondary_timer_cb, NULL);
 		layer_mark_dirty(layer);
 	}
@@ -451,14 +446,14 @@ static void tap_handler(AccelAxisType axis, int32_t direction) {
 
 static void updateSettings(){
 	gpath_destroy(hour_arrow);
-	switch(get_hand()){
-		case HAND_LINE : hour_arrow = gpath_create(get_full_hour_mode() ? &LINE_HAND_24_POINTS : &LINE_HAND_POINTS); break;
-		case HAND_BIG_LINE : hour_arrow = gpath_create(get_full_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
+	switch(enamel_get_hand()){
+		case HAND_LINE : hour_arrow = gpath_create(enamel_get_full_hour_mode() ? &LINE_HAND_24_POINTS : &LINE_HAND_POINTS); break;
+		case HAND_BIG_LINE : hour_arrow = gpath_create(enamel_get_full_hour_mode() ? &BIG_LINE_HAND_24_POINTS : &BIG_LINE_HAND_POINTS); break;
 		case HAND_ARROW : 
-		default : hour_arrow = gpath_create(get_full_hour_mode() ? &ARROW_HAND_24_POINTS : &ARROW_HAND_POINTS); break;
+		default : hour_arrow = gpath_create(enamel_get_full_hour_mode() ? &ARROW_HAND_24_POINTS : &ARROW_HAND_POINTS); break;
 	}
 
-	switch(get_color_theme()){
+	switch(enamel_get_color_theme()){
 		case COLOR_THEME_DARK : 
 			bg_color = GColorBlack;
 			bg_circle_color = GColorBlack;
@@ -490,7 +485,7 @@ static void updateSettings(){
 	}
 
 #ifdef PBL_COLOR
-	hand_color = get_hand_color();
+	hand_color = enamel_get_hand_color();
 #endif
 	hand_outline_color = GColorClear;
 	if(gcolor_equal(bg_color,hand_color) || gcolor_equal(bg_circle_color,hand_color))
@@ -501,7 +496,7 @@ static void updateSettings(){
 	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
 	replace_gbitmap_color(GColorBlack, dots_outline_color, bt_disconnected);
 
-	switch(get_secondary_display()) {
+	switch(enamel_get_secondary_display()) {
 		case SECONDARY_DISPLAY_NOTHING :
 			accel_tap_service_unsubscribe();
 			break;
@@ -520,7 +515,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 
 static void bluetooth_connection_handler(bool connected){
 	btConnected = connected;
-	if(get_vibrate_on_bt_lost()){
+	if(enamel_get_vibrate_on_bt_lost()){
 		vibes_cancel();
 		if(connected){
 			vibes_long_pulse();
@@ -561,7 +556,7 @@ static void init(void) {
 
 	updateSettings();
 
-	isAnimating = get_animated();
+	isAnimating = enamel_get_animated();
 	if(isAnimating)
 		percent = 0;
 
