@@ -1,5 +1,5 @@
 {
-  "versionLabel": "3.12",
+  "versionLabel": "3.13",
   "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
   "appKeys": {
     "hand": 3,
@@ -15,10 +15,11 @@
     "mark_space": 13,
     "secondary_display": 14,
     "step_day_goal": 15,
-    "secondary_display_timeout": 16
+    "secondary_display_timeout": 16,
+    "force_hour_format": 17
   },
   "longName": "HopPicker",
-  "versionCode": 42,
+  "versionCode": 43,
   "capabilities": [
     "configurable",
     "health"

@@ -40,6 +40,27 @@
       "description" : "12 hours around the edge or all 24 hours"
     },
     {
+      "type": "select",
+      "id": "force_hour_format",
+      "appKey": "force_hour_format",
+      "defaultValue": "0",
+      "label": "Force system hour format",
+      "options": [
+        { 
+          "label": "No", 
+          "value": 0
+        },
+        { 
+          "label": "12 h",
+          "value": 1 
+        },
+        { 
+          "label": "24 h",
+          "value": 2 
+        }
+      ]
+    },
+    {
       "type": "color",
       "id": "hand_color",
       "appKey": "hand_color",
