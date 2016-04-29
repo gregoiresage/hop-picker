@@ -187,8 +187,10 @@ static void drawClock(GPoint center, GContext *ctx){
 				gpath_draw_outline(ctx, mark_path);
 		}
 		
-		if(!isAnimating && hour_mark) {			
-			if(clock_is_24h_style() || enamel_get_full_hour_mode()){
+		if(!isAnimating && hour_mark) {	
+			if((clock_is_24h_style() && enamel_get_force_hour_format() != FORCE_HOUR_FORMAT_12_H)
+				|| enamel_get_force_hour_format() == FORCE_HOUR_FORMAT_24_H
+				|| enamel_get_full_hour_mode()){
 				graphics_draw_text(ctx,
 					txt[(i % (24*mark_space))/mark_space],
 					custom_font,

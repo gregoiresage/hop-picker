@@ -15,7 +15,8 @@
     "mark_space": 13,
     "secondary_display": 14,
     "step_day_goal": 15,
-    "secondary_display_timeout": 16
+    "secondary_display_timeout": 16,
+    "force_hour_format": 17
   },
   "longName": "HopPicker",
   "versionCode": 0,
