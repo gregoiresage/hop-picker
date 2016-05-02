@@ -53,8 +53,7 @@
       {
         "type": "bitmap",
         "name": "IMAGE_BT_DISCONNECTED",
-        "file": "images/bluetooth_not_connected.png",
-        "memoryFormat": "1BitPalette"
+        "file": "images/bluetooth_not_connected.png"
       },
       {
         "menuIcon": true,
