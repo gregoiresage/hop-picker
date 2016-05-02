@@ -1,5 +1,5 @@
 {
-  "versionLabel": "255.0",
+  "versionLabel": "3.14",
   "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
   "appKeys": {
     "hand": 3,
@@ -19,7 +19,7 @@
     "force_hour_format": 17
   },
   "longName": "HopPicker",
-  "versionCode": 0,
+  "versionCode": 44,
   "capabilities": [
     "configurable",
     "health"
