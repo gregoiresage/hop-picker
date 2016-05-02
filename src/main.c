@@ -349,6 +349,13 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 		if(enamel_get_display_bt_icon() && !btConnected){
   			graphics_context_set_compositing_mode(ctx,GCompOpSet);
 
+#ifdef PBL_ROUND
+  			GPoint btPos;
+  			uint16_t radiusFromCenter = (enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C) + 35;
+  			btPos.y = (int16_t)(-cos_lookup(angle) * radiusFromCenter / TRIG_MAX_RATIO) + centerClock.y;
+			btPos.x = (int16_t)(sin_lookup(angle) * radiusFromCenter / TRIG_MAX_RATIO) + centerClock.x;
+  			graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(btPos.x-16,btPos.y-16,32,32));
+#else
   			if(enamel_get_full_hour_mode()){
 				if(hours < 6)
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,160-32,32,32));
@@ -369,7 +376,7 @@ static void layer_update_proc(Layer *layer, GContext *ctx) {
 				else 
 					graphics_draw_bitmap_in_rect(ctx, bt_disconnected, GRect(0,0,32,32));
   			}
-
+#endif
 		}
 
 		if(secondary_display_timer != NULL && enamel_get_secondary_display() != SECONDARY_DISPLAY_NOTHING){
@@ -496,7 +503,11 @@ static void updateSettings(){
 	if(bt_disconnected)
 		gbitmap_destroy(bt_disconnected);
 	bt_disconnected = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BT_DISCONNECTED);
-	replace_gbitmap_color(GColorBlack, dots_outline_color, bt_disconnected);
+	if(dots_outline_color.argb == GColorWhite.argb) {
+		replace_gbitmap_color(GColorBlack, GColorRed, bt_disconnected);
+		replace_gbitmap_color(GColorWhite, GColorBlack, bt_disconnected);
+		replace_gbitmap_color(GColorRed, GColorWhite, bt_disconnected);
+	}
 
 	switch(enamel_get_secondary_display()) {
 		case SECONDARY_DISPLAY_NOTHING :
