@@ -44,12 +44,15 @@ static int hours = 0;
 static int minutes = 0;
 static int day = 0;
 
+static int second_tz_offset = 0;
+
 static int layer_update_count = 0;
 
 static AppTimer *secondary_display_timer;
 
 #define DATE_POSITION_FROM_CENTER 110
 #define SECOND_HAND_LENGTH_A 150
+#define SECOND_HAND_LENGTH_B 200
 #define SECOND_HAND_LENGTH_C 180
 
 #define SMALL_DOT_RADIUS 3
@@ -122,11 +125,13 @@ static void animation_stopped(Animation *animation, bool finished, void *data) {
 
 static void drawClock(GPoint center, GContext *ctx){
 	GPoint segA;
+    GPoint segB; // outer position for second timezone
 	GPoint segC;
 
 	GRect bounds = layer_get_bounds(layer);
 
 	uint16_t segA_length = enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_A + 150 : SECOND_HAND_LENGTH_A;
+	uint16_t segB_length = enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_B + 150 : SECOND_HAND_LENGTH_B;
 	uint16_t segC_length = enamel_get_full_hour_mode() ? SECOND_HAND_LENGTH_C + 150 : SECOND_HAND_LENGTH_C;
 	
 	graphics_context_set_fill_color(ctx, bg_circle_color);
@@ -162,10 +167,13 @@ static void drawClock(GPoint center, GContext *ctx){
 			segC.y = (int16_t)((-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y - bounds.size.h/2) * percent / 100 + bounds.size.h/2;
 			segC.x = (int16_t)((sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x - bounds.size.w/2) * percent / 100 + bounds.size.w/2;
 			segA.x = segA.y = 0;
+			segB.x = segB.y = 0;
 		}
 		else {
 			segA.y = (int16_t)(-cos_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.y;
 			segA.x = (int16_t)(sin_lookup(angle) * segA_length / TRIG_MAX_RATIO) + center.x;
+            segB.y = (int16_t)(-cos_lookup(angle) * segB_length / TRIG_MAX_RATIO) + center.y;
+            segB.x = (int16_t)(sin_lookup(angle) * segB_length / TRIG_MAX_RATIO) + center.x;
 			segC.y = (int16_t)(-cos_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.y;
 			segC.x = (int16_t)(sin_lookup(angle) * segC_length / TRIG_MAX_RATIO) + center.x;
 		}
@@ -197,7 +205,16 @@ static void drawClock(GPoint center, GContext *ctx){
 					GRect(segA.x-25, segA.y-25, 50, 50),
 					GTextOverflowModeWordWrap,
 					GTextAlignmentCenter,
-					NULL);	
+					NULL);
+                if(second_tz_offset != 0) {
+                    graphics_draw_text(ctx,
+                        txt[((i + second_tz_offset * mark_space) % (24*mark_space))/mark_space],
+                        small_font,
+                        GRect(segB.x-11, segB.y-11, 22, 22),
+                        GTextOverflowModeWordWrap,
+                        GTextAlignmentCenter,
+                        NULL);
+                }
 			}
 			else {
 				graphics_draw_text(ctx,
@@ -207,6 +224,15 @@ static void drawClock(GPoint center, GContext *ctx){
 					GTextOverflowModeWordWrap,
 					GTextAlignmentCenter,
 					NULL);
+                if(second_tz_offset != 0) {
+                    graphics_draw_text(ctx,
+                        ((i + second_tz_offset * mark_space) % (12*mark_space))/mark_space == 0 ? "12" : txt[((i + second_tz_offset * mark_space) % (12*mark_space))/mark_space],
+                        small_font,
+                        GRect(segB.x-11, segB.y-11, 22, 22),
+                        GTextOverflowModeWordWrap,
+                        GTextAlignmentCenter,
+                        NULL);
+                }
 			}
 		}
 	}
@@ -519,6 +545,8 @@ static void updateSettings(){
 	}
 
 	window_set_background_color(window, bg_color);
+
+    second_tz_offset = enamel_get_second_tz_offset();
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
