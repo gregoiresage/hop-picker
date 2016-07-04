@@ -222,6 +222,15 @@
           "value": 1 
         }
       ]
+    },
+    {
+      "type": "slider",
+      "id": "second_tz_offset",
+      "appKey": "second_tz_offset",
+      "label": "Second Timezone Offset",
+      "defaultValue": 0,
+      "min": -12,
+      "max": 12
     }
   ]
 },
