@@ -1,12 +1,12 @@
-var appinfo = require('appinfo.json');
+var package = require('../../package.json');
 
-var Clay = require('clay');
-var clayConfig = require('config.json');
-var customClay = require('custom-clay');
+var Clay = require('pebble-clay');
+var clayConfig = require('./config.json');
+var customClay = require('./custom-clay');
 var clay = new Clay(clayConfig, customClay, {autoHandleEvents: false});
 
 Pebble.addEventListener('ready', function(e) {
-  console.log(appinfo.longName + " " + appinfo.versionLabel + " ready !");
+  console.log(package.pebble.displayName + " " + package.version + " ready !");
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {

@@ -1,0 +1,84 @@
+{
+  "version": "0.0.0",
+  "author": "Gregoire Sage",
+  "private": true,
+  "dependencies": {
+    "enamel": "^1.1.3"
+  },
+  "keywords": [
+    "pebble-app"
+  ],
+  "pebble": {
+    "sdkVersion": "3",
+    "resources": {
+      "media": [
+        {
+          "type": "font",
+          "characterRegex": "[0-9]",
+          "name": "COMFORTAA_40",
+          "file": "fonts/Comfortaa-Bold.ttf"
+        },
+        {
+          "type": "font",
+          "characterRegex": "[0-9%]",
+          "name": "COMFORTAA_18",
+          "file": "fonts/Comfortaa-Bold.ttf"
+        },
+        {
+          "type": "font",
+          "characterRegex": "[0-9%]",
+          "name": "COMFORTAA_26",
+          "file": "fonts/Comfortaa-Bold.ttf"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_BT_DISCONNECTED",
+          "file": "images/bluetooth_not_connected.png"
+        },
+        {
+          "menuIcon": true,
+          "type": "png",
+          "name": "IMAGE_MENU_ICON",
+          "file": "images/menu_icon.png"
+        }
+      ]
+    },
+    "projectType": "native",
+    "uuid": "05e08c37-a3a3-478b-86b9-aa736019f85a",
+    "messageKeys": [
+      "mark_space",
+      "info_display",
+      "info_text_size",
+      "second_tz_offset",
+      "hand",
+      "secondary_display_timeout",
+      "vibrate_on_bt_lost",
+      "color_theme",
+      "hand_color",
+      "display_bt_icon",
+      "force_hour_format",
+      "step_day_goal",
+      "secondary_display",
+      "animated",
+      "full_hour_mode",
+      "mark_style"
+    ],
+    "enableMultiJS": true,
+    "displayName": "HopPicker",
+    "watchapp": {
+      "onlyShownOnCommunication": false,
+      "hiddenApp": false,
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "basalt",
+      "aplite",
+      "chalk"
+    ],
+    "capabilities": [
+      "configurable",
+      "health"
+    ]
+  },
+  "name": "HopPicker"
+}

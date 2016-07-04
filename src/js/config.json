@@ -10,7 +10,7 @@
     {
       "type": "select",
       "id": "color_theme",
-      "appKey": "color_theme",
+      "messageKey": "color_theme",
       "defaultValue": "0",
       "label": "Color Style",
       "options": [
@@ -35,14 +35,14 @@
     {
       "type": "toggle",
       "id": "full_hour_mode",
-      "appKey": "full_hour_mode",
+      "messageKey": "full_hour_mode",
       "label": "24 hours mode",
       "description" : "12 hours around the edge or all 24 hours"
     },
     {
       "type": "select",
       "id": "force_hour_format",
-      "appKey": "force_hour_format",
+      "messageKey": "force_hour_format",
       "defaultValue": "0",
       "label": "Force system hour format",
       "options": [
@@ -63,14 +63,14 @@
     {
       "type": "color",
       "id": "hand_color",
-      "appKey": "hand_color",
+      "messageKey": "hand_color",
       "defaultValue": "FF0000",
       "label": "Watch hand color"
     },
     {
       "type": "select",
       "id": "hand",
-      "appKey": "hand",
+      "messageKey": "hand",
       "defaultValue": "0",
       "label": "Hand Style",
       "options": [
@@ -91,7 +91,7 @@
     {
       "type": "select",
       "id": "mark_style",
-      "appKey": "mark_style",
+      "messageKey": "mark_style",
       "defaultValue": "0",
       "label": "Mark Style",
       "options": [
@@ -108,7 +108,7 @@
     {
       "type": "select",
       "id": "mark_space",
-      "appKey": "mark_space",
+      "messageKey": "mark_space",
       "defaultValue": "15",
       "label": "Mark space",
       "description" : "Display a mark every X minutes",
@@ -134,7 +134,7 @@
     {
       "type": "toggle",
       "id": "animated",
-      "appKey": "animated",
+      "messageKey": "animated",
       "label": "Startup animation",
       "defaultValue": true
     }    
@@ -150,7 +150,7 @@
     {
       "type": "select",
       "id": "info_display",
-      "appKey": "info_display",
+      "messageKey": "info_display",
       "defaultValue": "1",
       "label": "Display",
       "options": [
@@ -179,7 +179,7 @@
     {
       "type": "select",
       "id": "secondary_display",
-      "appKey": "secondary_display",
+      "messageKey": "secondary_display",
       "defaultValue": "0",
       "label": "Secondary Display",
       "description" : "Shake your watch to show the secondary display for 9 seconds",
@@ -209,7 +209,7 @@
     {
       "type": "select",
       "id": "info_text_size",
-      "appKey": "info_text_size",
+      "messageKey": "info_text_size",
       "defaultValue": "0",
       "label": "Text Size",
       "options": [
@@ -226,7 +226,7 @@
     {
       "type": "slider",
       "id": "second_tz_offset",
-      "appKey": "second_tz_offset",
+      "messageKey": "second_tz_offset",
       "label": "Second Timezone Offset",
       "defaultValue": 0,
       "min": -12,
@@ -244,14 +244,14 @@
     {
       "type": "toggle",
       "id": "vibrate_on_bt_lost",
-      "appKey": "vibrate_on_bt_lost",
+      "messageKey": "vibrate_on_bt_lost",
       "label": "Vibrate",
       "description": "Vibrate on disconnection"
     },
     {
       "type": "toggle",
       "id": "display_bt_icon",
-      "appKey": "display_bt_icon",
+      "messageKey": "display_bt_icon",
       "label": "Display icon",
       "description": "Display an icon on disconnection",
       "defaultValue": true

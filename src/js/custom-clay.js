@@ -9,7 +9,7 @@ module.exports = function(minified) {
     connection.onopen = function() {
       Clay.getAllItems().map( function(item) {
         item.on('change', function() {
-          connection.send(JSON.stringify({id: this.appKey, value: this.get()}));
+          connection.send(JSON.stringify({id: this.messageKey, value: this.get()}));
         });
       });
     };
