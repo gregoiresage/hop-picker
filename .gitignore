@@ -3,3 +3,5 @@
 .lock-*
 build
 generated
+
+node_modules/

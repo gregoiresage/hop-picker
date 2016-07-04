@@ -2,6 +2,7 @@
 #include "enamel.h"
 #include "gbitmap_color_palette_manipulator.h"
 #include "health.h"
+#include <pebble-events/pebble-events.h>
 
 static Window *window = NULL;
 static Layer  *layer = NULL;
@@ -545,7 +546,7 @@ static void updateSettings(){
 	window_set_background_color(window, bg_color);
 }
 
-static void in_received_handler(DictionaryIterator *iter, void *context) {
+static void enamel_register_settings_received_cb() {
 	updateSettings();
 	layer_mark_dirty(layer);
 }
@@ -565,8 +566,10 @@ static void bluetooth_connection_handler(bool connected){
 }
 
 static void init(void) {
-	enamel_init(0,0);
-	enamel_register_custom_inbox_received(in_received_handler);
+	enamel_init();
+	enamel_register_settings_received(enamel_register_settings_received_cb);
+
+	events_app_message_open();
 
 	window = window_create();
 	window_set_window_handlers(window, (WindowHandlers) {
