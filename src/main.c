@@ -44,8 +44,6 @@ static int hours = 0;
 static int minutes = 0;
 static int day = 0;
 
-static int second_tz_offset = 0;
-
 static int layer_update_count = 0;
 
 static AppTimer *secondary_display_timer;
@@ -206,9 +204,9 @@ static void drawClock(GPoint center, GContext *ctx){
 					GTextOverflowModeWordWrap,
 					GTextAlignmentCenter,
 					NULL);
-                if(second_tz_offset != 0) {
+                if(enamel_get_second_tz_offset() != 0) {
                     graphics_draw_text(ctx,
-                        txt[((i + second_tz_offset * mark_space) % (24*mark_space))/mark_space],
+                        txt[((i + enamel_get_second_tz_offset() * mark_space) % (24*mark_space))/mark_space],
                         small_font,
                         GRect(segB.x-11, segB.y-11, 22, 22),
                         GTextOverflowModeWordWrap,
@@ -224,9 +222,9 @@ static void drawClock(GPoint center, GContext *ctx){
 					GTextOverflowModeWordWrap,
 					GTextAlignmentCenter,
 					NULL);
-                if(second_tz_offset != 0) {
+                if(enamel_get_second_tz_offset() != 0) {
                     graphics_draw_text(ctx,
-                        ((i + second_tz_offset * mark_space) % (12*mark_space))/mark_space == 0 ? "12" : txt[((i + second_tz_offset * mark_space) % (12*mark_space))/mark_space],
+                        ((i + enamel_get_second_tz_offset() * mark_space) % (12*mark_space))/mark_space == 0 ? "12" : txt[((i + enamel_get_second_tz_offset() * mark_space) % (12*mark_space))/mark_space],
                         small_font,
                         GRect(segB.x-11, segB.y-11, 22, 22),
                         GTextOverflowModeWordWrap,
@@ -545,8 +543,6 @@ static void updateSettings(){
 	}
 
 	window_set_background_color(window, bg_color);
-
-    second_tz_offset = enamel_get_second_tz_offset();
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
